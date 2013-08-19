@@ -6,6 +6,7 @@
 #include <NiTE.h> // NITE2 Header file
 #include <opencv2/opencv.hpp>
 #include "BodyDataNode.h"
+#include <vector>
 
 #include <fstream>
 
@@ -15,11 +16,14 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//add
 	std::ofstream outfs("test1.dat");
-	int c;
-	int rec=0;
-	int myrec=0;
+	int key;
+	int idx;
+	bool record_model = false;
+	bool record_user = false;
+	std::vector<BodyDataNode> model, user, goal;
+	BodyDataNode user, goal;
 
-	BodyDataNode model,mydata,goal;
+//	BodyDataNode model,mydata,goal;
 
 	// Initialize OpenNI2
 	openni::OpenNI::initialize();
@@ -92,14 +96,14 @@ int _tmain(int argc, _TCHAR* argv[])
 	color[6]  = cv::Vec3b(   0, 255, 255 );
 
 	std::cout<<"start"<<std::endl;
-	while( 1 ){
+	while(true){
 		// Retrieve Frame from Color Stream (8bit 3channel)
 		openni::VideoFrameRef colorFrame;
 		colorStream.readFrame( &colorFrame ); // Retrieve a Frame from Stream
 		if( colorFrame.isValid() ){
 			colorMat = cv::Mat( colorStream.getVideoMode().getResolutionY(), colorStream.getVideoMode().getResolutionX(), CV_8UC3, reinterpret_cast<uchar*>( const_cast<void*>( colorFrame.getData() ) ) ); // Retrieve a Data from Frame 
 			cv::cvtColor( colorMat, colorMat, CV_RGB2BGR ); // Change the order of the pixel RGB to BGR
-			if(myrec)colorMat1=colorMat.clone();
+			if(record_user)colorMat1=colorMat.clone();
 		}
 
 		// Retrieve Frame from Depth Stream (16bit 1channel)
@@ -129,6 +133,9 @@ int _tmain(int argc, _TCHAR* argv[])
 		// Retrieve Skeleton Frame from UserTracker
 		skeletonMat = cv::Mat( height, width, CV_8UC3, cv::Scalar( 255, 255, 255 ) );
 		const nite::Array<nite::UserData>& users = userFrame.getUsers(); // Retrieve User from User Frame
+	  /**
+		 * TODO : If we assume only a model, this for loop is unnecessary
+		 */
 		for( int count = 0; count < users.getSize(); count++ ){
 			// Start Skeleton Tracking a new User
 			if( users[count].isNew() ){
@@ -138,10 +145,11 @@ int _tmain(int argc, _TCHAR* argv[])
 			else if( !users[count].isLost() && users[count].isVisible() ){
 				const nite::Skeleton& skeleton = users[count].getSkeleton(); // Retrieve Skeleton form User
 				if( skeleton.getState() == nite::SkeletonState::SKELETON_TRACKED ){
+					BodyDataNode tmp_body_data;
 					for( int position = 0; position < 15; position++ ){//20?
 						const nite::SkeletonJoint& joint = skeleton.getJoint((nite::JointType)position); // Retrieve Joint from Skeleton ( Total 14 joint )
 						const nite::Point3f& point = joint.getPosition(); // Retrieve three-dimensional position of the Joint
-						if(rec){
+						if(record_model){
 							outfs<<point.x
 							<<" "<<point.y
 							<<" "<<point.z<<std::endl;
@@ -149,26 +157,38 @@ int _tmain(int argc, _TCHAR* argv[])
 							<<" "<<point.y
 							<<" "<<point.z<<std::endl;
 						}
-						if(rec){
+						tmp_body_data[position] = ThreeDVector(point.x,point.y,point.z);
+						/*
+						if(record_model){
 							model.joints[position] = ThreeDVector(point.x,point.y,point.z);
-						}else if(myrec){
+						}else if(record_user){
 							mydata.joints[position] = ThreeDVector(point.x,point.y,point.z);
 						}
+						*/
 						cv::Point2f registPoint;
 						userTracker.convertJointCoordinatesToDepth( point.x, point.y, point.z, &registPoint.x, &registPoint.y ); // Registration Joint Position to Depth
-						cv::circle( colorMat, registPoint, 10, static_cast<cv::Scalar>( color[count + 1] ), -1, CV_AA );
-						
-						
+						if(record_model) cv::circle( colorMat, registPoint, 10, static_cast<cv::Scalar>( color[count + 1] ), -1, CV_AA );
 					}
-					if(rec){
+					if(record_model){
 						outfs<<std::endl;
-						rec=0;
-					}else if(myrec){
-						goal=mydata.convert(model);
-						for( int position = 0; position < 15; position++ ){
-							cv::Point2f registPoint2;
-							userTracker.convertJointCoordinatesToDepth( goal.joints[position].getX(), goal.joints[position].getY(), goal.joints[position].getZ(), &registPoint2.x, &registPoint2.y ); // Registration Joint Position to Depth
-						cv::circle( colorMat1, registPoint2, 10, static_cast<cv::Scalar>( color[count + 1] ), -1, CV_AA );
+						// add data of this frame to model
+						model.push_back(tmp_body_data);
+						record_model = false;
+					}else if(record_user){
+						user = tmp_body_data;
+						if(idx < model.size()){
+							// user data of this frame convert to goal from model[idx]
+							goal=user.convert(model[idx++]);
+							for( int position = 0; position < 15; position++ ){
+								cv::Point2f registPoint2;
+								int diff = (goal.joints[position]-user.joints[position]).abs();
+								if(i_diff > 255) i_diff = 255;
+								userTracker.convertJointCoordinatesToDepth( goal.joints[position].getX(), goal.joints[position].getY(), goal.joints[position].getZ(), &registPoint2.x, &registPoint2.y ); // Registration Joint Position to Depth
+								cv::circle( colorMat1, registPoint2, 10, static_cast<cv::Scalar>( cv::Vec3b(i_diff,0,255-i_diff) ), -1, CV_AA );
+							}
+						}else{
+							record_user = false;
+							idx = 0;
 						}
 					}
 				}
@@ -177,26 +197,33 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		// Draw Images retrieved from Kinect
 		cv::imshow( "Color", colorMat );
-		if(myrec){cv::imshow( "Picture", colorMat1 );}
+		if(record_user){cv::imshow( "Picture", colorMat1 );}
 		//cv::imshow( "User", userMat );
 		//cv::imshow( "Skeleton", skeletonMat );
-	    if(rec){ 
+	    if(record_model){ 
 			std::cout<<"There is no person."<<std::endl;
-			rec=0;
+			rec_model = false;
 		}
-		c=cv::waitKey( 30 );
+		key=cv::waitKey( 30 );
 		// Press the Escape key to Exit
-		if( c == VK_ESCAPE ){
+		if( key == VK_ESCAPE ){
 			break;
-		}else if( c == VK_SPACE){
-			rec=1;
-			std::cout<<"rec"<<std::endl;
-		}else if(c == VK_RETURN){
-			if(myrec==0){
-				myrec=1;
+		}else if( key == VK_SPACE){
+			if(!record_model){
+				record_model = true;
+				std::cout<<"record_model"<<std::endl;
+			}else{
+				record_model = false;
+				std::cout<<"myrec stop"<<std::endl;
+			}
+		}else if(key == VK_RETURN){
+			if(!record_user){
+				record_user = true;
+				idx = 0;
+				user.reset();
 				std::cout<<"myrec"<<std::endl;
 			}else{
-				myrec=0;
+				record_user = false;
 				std::cout<<"myrec stop"<<std::endl;
 			}
 		}
