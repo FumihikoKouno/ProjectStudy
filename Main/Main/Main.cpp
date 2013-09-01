@@ -181,10 +181,14 @@ int _tmain(int argc, _TCHAR* argv[])
 							goal=user.convert(model[idx++]);
 							for( int position = 0; position < 15; position++ ){
 								cv::Point2f registPoint2;
-								int diff = (goal.joints[position]-user.joints[position]).abs();
-								if(i_diff > 255) i_diff = 255;
+								int z_diff = (goal.joints[position].getZ()-user.joints[position].getZ());
+								if(z_diff < -255) z_diff = -255;
+								if(z_diff > 255) z_diff = 255;
+								int z_diff_abs;
+								if(z_diff < 0) z_diff_abs = -z_diff;
+								else z_diff_abs = z_diff;
 								userTracker.convertJointCoordinatesToDepth( goal.joints[position].getX(), goal.joints[position].getY(), goal.joints[position].getZ(), &registPoint2.x, &registPoint2.y ); // Registration Joint Position to Depth
-								cv::circle( colorMat1, registPoint2, 10, static_cast<cv::Scalar>( cv::Vec3b(i_diff,0,255-i_diff) ), -1, CV_AA );
+								cv::circle( colorMat1, registPoint2, 16+z_diff/16, static_cast<cv::Scalar>( cv::Vec3b(z_diff_abs,0,255-z_diff_abs) ), -1, CV_AA );
 							}
 						}else{
 							record_user = false;
