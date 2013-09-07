@@ -7,8 +7,6 @@
 ThreeDVector BodyDataNode::diff = ThreeDVector();
 bool BodyDataNode::first = true;
 
-int main(){return 0;}
-
 BodyDataNode::BodyDataNode(){}
 //BodyDataNode::BodyDataNode(double x,double y, double z):tv(x,y,z){}
 //BodyDataNode::BodyDataNode(ThreeDVector t,Quaternion qu):tv(t),q(qu){}
