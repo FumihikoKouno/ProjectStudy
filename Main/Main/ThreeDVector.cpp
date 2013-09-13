@@ -100,6 +100,6 @@ double ThreeDVector::getThetaZX(const ThreeDVector& v){
 
 
 std::ostream& operator<<(std::ostream& os, const ThreeDVector& v){
-  os << '(' << v.getX() << ',' << v.getY() << "," << v.getZ() << ')';
+  os << v.getX() << " " << v.getY() << " " << v.getZ();
   return os;
 }

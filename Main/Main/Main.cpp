@@ -6,6 +6,7 @@
 #include <NiTE.h> // NITE2 Header file
 #include <opencv2/opencv.hpp>
 #include "BodyDataNode.h"
+#include "MotionData.h"
 #include <vector>
 
 #include <fstream>
@@ -20,8 +21,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	int idx;
 	bool record_model = false;
 	bool record_user = false;
-	std::vector<BodyDataNode> model, user, goal;
-	BodyDataNode user, goal;
+	MotionData model, user, goal;
+//	BodyDataNode user, goal;
 
 //	BodyDataNode model,mydata,goal;
 
@@ -172,22 +173,23 @@ int _tmain(int argc, _TCHAR* argv[])
 					if(record_model){
 						outfs<<std::endl;
 						// add data of this frame to model
-						model.push_back(tmp_body_data);
+						model.add(tmp_body_data);
 						record_model = false;
 					}else if(record_user){
-						user = tmp_body_data;
+						user.add(tmp_body_data);
 						if(idx < model.size()){
 							// user data of this frame convert to goal from model[idx]
-							goal=user.convert(model[idx++]);
+							BodyDataNode view_node;
+							user.convert(model,view_node);
 							for( int position = 0; position < 15; position++ ){
 								cv::Point2f registPoint2;
-								int z_diff = (goal.joints[position].getZ()-user.joints[position].getZ());
+								int z_diff = (view_node.joints[position].getZ()-user.joints[position].getZ());
 								if(z_diff < -255) z_diff = -255;
 								if(z_diff > 255) z_diff = 255;
 								int z_diff_abs;
 								if(z_diff < 0) z_diff_abs = -z_diff;
 								else z_diff_abs = z_diff;
-								userTracker.convertJointCoordinatesToDepth( goal.joints[position].getX(), goal.joints[position].getY(), goal.joints[position].getZ(), &registPoint2.x, &registPoint2.y ); // Registration Joint Position to Depth
+								userTracker.convertJointCoordinatesToDepth( view_node.joints[position].getX(), view_node.joints[position].getY(), view_node.joints[position].getZ(), &registPoint2.x, &registPoint2.y ); // Registration Joint Position to Depth
 								cv::circle( colorMat1, registPoint2, 16+z_diff/16, static_cast<cv::Scalar>( cv::Vec3b(z_diff_abs,0,255-z_diff_abs) ), -1, CV_AA );
 							}
 						}else{
@@ -215,6 +217,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		}else if( key == VK_SPACE){
 			if(!record_model){
 				record_model = true;
+				model.reset();
 				std::cout<<"record_model"<<std::endl;
 			}else{
 				record_model = false;

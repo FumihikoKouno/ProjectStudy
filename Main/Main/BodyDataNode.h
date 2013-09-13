@@ -19,8 +19,11 @@ public:
 // modelのデータを参考にretの関節toの座標をfromの座標から計算し、代入する。
   void make_next(BodyDataNode& ret, BodyDataNode& model, int from, int to);
 // modelデータを引数にとり、ユーザが取るべき姿勢の各関節の座標を持つBodyDataNodeを返す
-	BodyDataNode convert(BodyDataNode& bdnode);
-
+//	BodyDataNode& convert(BodyDataNode& bdnode);
+/**
+ * modelデータを引数にとり、ユーザが取るべき姿勢の各関節の座標を持つBodyDataNodeを返す
+ */
+	void convert(BodyDataNode& bdnode, ThreeDVector& diff, BodyDataNode& ret);
 /**
  * リセット
  */ 
@@ -32,8 +35,8 @@ public:
 //	void add_children(double x,double y, double z);
 
 private:
-  static ThreeDVector diff;
-  static bool first;
+//  static ThreeDVector diff;
+//  static bool first;
 //	ThreeDVector tv;
 //	std::vector<BodyDataNode*> children;
 //	Quaternion q;

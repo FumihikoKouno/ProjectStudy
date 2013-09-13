@@ -2,10 +2,10 @@
 
 #include "BodyDataNode.h"
 #include "NiteEnums.h"
-#include "JointDataHandler.h"
+//#include "JointDataHandler.h"
 
-ThreeDVector BodyDataNode::diff = ThreeDVector();
-bool BodyDataNode::first = true;
+//ThreeDVector BodyDataNode::diff = ThreeDVector();
+//bool BodyDataNode::first = true;
 
 BodyDataNode::BodyDataNode(){}
 //BodyDataNode::BodyDataNode(double x,double y, double z):tv(x,y,z){}
@@ -27,58 +27,45 @@ void BodyDataNode::add_children(double x,double y, double z)
 
 // modelのデータを参考にretの関節toの座標をfromの座標から計算し、代入する。
 void BodyDataNode::make_next(BodyDataNode& ret, BodyDataNode& model, int from, int to){
-  // modelデータからfrom->toの単位ベクトルを求める
-  ThreeDVector dir = model.joints[to]-model.joints[from];
-  dir /= dir.abs();
-  // ユーザのfrom、to間の節の長さを求める
-  double abs = (joints[to]-joints[from]).abs();
-  // modelデータから得た単位ベクトルとユーザの節の長さから新たな点(to)の座標を算出する
-  ret.joints[to] = ret.joints[from] + (dir * abs);
-  return;
+	// modelデータからfrom->toの単位ベクトルを求める
+	ThreeDVector dir = model.joints[to]-model.joints[from];
+	dir /= dir.abs();
+	// ユーザのfrom、to間の節の長さを求める
+	double abs = (joints[to]-joints[from]).abs();
+	// modelデータから得た単位ベクトルとユーザの節の長さから新たな点(to)の座標を算出する
+	ret.joints[to] = ret.joints[from] + (dir * abs);
+	return;
 }
 
 /**
  * リセット用関数
  */
 void BodyDataNode::reset(){
-  first = true;
+//	first = true;
 }
 
 /**
  * modelデータを引数にとり、ユーザが取るべき姿勢の各関節の座標を持つBodyDataNodeを返す
  * 動かなかったらバグを取るか下のconvert関数を使うかしてください
  */
-BodyDataNode BodyDataNode::convert(BodyDataNode& model){
-
-  // 返り値用BodyDataNode
-  BodyDataNode ret;
-  // 基準点は正しいとする  
-  if(first){
-    // 最初のフレームでの基準点
-    ret.joints[JOINT_TORSO] = joints[JOINT_TORSO];
-    diff = joints[JOINT_TORSO]-model.joints[JOINT_TORSO];
-    first = false;
-  }else{
-    // 二回目以降のフレームの基準点
-    ret.joints[JOINT_TORSO] = model.joints[JOINT_TORSO]+diff;
-  }
-  // 徐々に新たな点を定める
-  make_next(ret,model,JOINT_TORSO,          JOINT_NECK);
-  make_next(ret,model,JOINT_NECK,           JOINT_HEAD);
-  make_next(ret,model,JOINT_TORSO,          JOINT_RIGHT_SHOULDER);
-  make_next(ret,model,JOINT_RIGHT_SHOULDER, JOINT_RIGHT_ELBOW);
-  make_next(ret,model,JOINT_RIGHT_ELBOW,    JOINT_RIGHT_HAND);
-  make_next(ret,model,JOINT_TORSO,          JOINT_LEFT_SHOULDER);
-  make_next(ret,model,JOINT_LEFT_SHOULDER,  JOINT_LEFT_ELBOW);
-  make_next(ret,model,JOINT_LEFT_ELBOW,     JOINT_LEFT_HAND);
-  make_next(ret,model,JOINT_TORSO,          JOINT_RIGHT_HIP);
-  make_next(ret,model,JOINT_RIGHT_HIP,      JOINT_RIGHT_KNEE);
-  make_next(ret,model,JOINT_RIGHT_KNEE,     JOINT_RIGHT_FOOT);
-  make_next(ret,model,JOINT_TORSO,          JOINT_LEFT_HIP);
-  make_next(ret,model,JOINT_LEFT_HIP,       JOINT_LEFT_KNEE);
-  make_next(ret,model,JOINT_LEFT_KNEE,      JOINT_LEFT_FOOT);
-  
-  return ret;
+void BodyDataNode::convert(BodyDataNode& model, ThreeDVector& diff, BodyDataNode& ret){
+	// 基準点を決める
+	ret.joints[JOINT_TORSO] = model.joints[JOINT_TORSO] + diff;
+	// 徐々に新たな点を定める
+	make_next(ret,model,JOINT_TORSO,          JOINT_NECK);
+	make_next(ret,model,JOINT_NECK,           JOINT_HEAD);
+	make_next(ret,model,JOINT_TORSO,          JOINT_RIGHT_SHOULDER);
+	make_next(ret,model,JOINT_RIGHT_SHOULDER, JOINT_RIGHT_ELBOW);
+	make_next(ret,model,JOINT_RIGHT_ELBOW,    JOINT_RIGHT_HAND);
+	make_next(ret,model,JOINT_TORSO,          JOINT_LEFT_SHOULDER);
+	make_next(ret,model,JOINT_LEFT_SHOULDER,  JOINT_LEFT_ELBOW);
+	make_next(ret,model,JOINT_LEFT_ELBOW,     JOINT_LEFT_HAND);
+	make_next(ret,model,JOINT_TORSO,          JOINT_RIGHT_HIP);
+	make_next(ret,model,JOINT_RIGHT_HIP,      JOINT_RIGHT_KNEE);
+	make_next(ret,model,JOINT_RIGHT_KNEE,     JOINT_RIGHT_FOOT);
+	make_next(ret,model,JOINT_TORSO,          JOINT_LEFT_HIP);
+	make_next(ret,model,JOINT_LEFT_HIP,       JOINT_LEFT_KNEE);
+	make_next(ret,model,JOINT_LEFT_KNEE,      JOINT_LEFT_FOOT);
 }
 
 /*
@@ -262,22 +249,27 @@ BodyDataNode BodyDataNode::convert(BodyDataNode& bdnode){
 // bが持っている各関節の三次元座標を出力する
 std::ostream& operator<<(std::ostream& os, const BodyDataNode& b){
 	ThreeDVector tmp;
-  os << "HEAD : " << b.joints[JOINT_HEAD] << std::endl;
-  os << "NECK : " << b.joints[JOINT_NECK] << std::endl;
-  os << "TORSO : " << b.joints[JOINT_TORSO] << std::endl;
-  os << "LEFT SHOULDER : " << b.joints[JOINT_LEFT_SHOULDER] << std::endl;
-  os << "LEFT ELBOW : " << b.joints[JOINT_LEFT_ELBOW] << std::endl;
-  os << "LEFT HAND : " << b.joints[JOINT_LEFT_HAND] << std::endl;
-  os << "LEFT HIP : " << b.joints[JOINT_LEFT_HIP] << std::endl;
-  os << "LEFT KNEE : " << b.joints[JOINT_LEFT_KNEE] << std::endl;
-  os << "LEFT FOOT : " << b.joints[JOINT_LEFT_FOOT] << std::endl;
-  os << "RIGHT SHOULDER : " << b.joints[JOINT_RIGHT_SHOULDER] << std::endl;
-  os << "RIGHT ELBOW : " << b.joints[JOINT_RIGHT_ELBOW] << std::endl;
-  os << "RIGHT HAND : " << b.joints[JOINT_RIGHT_HAND] << std::endl;
-  os << "RIGHT HIP : " << b.joints[JOINT_RIGHT_HIP] << std::endl;
-  os << "RIGHT KNEE : " << b.joints[JOINT_RIGHT_KNEE] << std::endl;
-  os << "RIGHT FOOT : " << b.joints[JOINT_RIGHT_FOOT] << std::endl;
-  return os;
+	for(int i = 0; i < 15; i++){
+		os << b.joints[i] << std::endl;
+	}
+	/*
+	os << "HEAD : " << b.joints[JOINT_HEAD] << std::endl;
+	os << "NECK : " << b.joints[JOINT_NECK] << std::endl;
+	os << "TORSO : " << b.joints[JOINT_TORSO] << std::endl;
+	os << "LEFT SHOULDER : " << b.joints[JOINT_LEFT_SHOULDER] << std::endl;
+	os << "LEFT ELBOW : " << b.joints[JOINT_LEFT_ELBOW] << std::endl;
+	os << "LEFT HAND : " << b.joints[JOINT_LEFT_HAND] << std::endl;
+	os << "LEFT HIP : " << b.joints[JOINT_LEFT_HIP] << std::endl;
+	os << "LEFT KNEE : " << b.joints[JOINT_LEFT_KNEE] << std::endl;
+	os << "LEFT FOOT : " << b.joints[JOINT_LEFT_FOOT] << std::endl;
+	os << "RIGHT SHOULDER : " << b.joints[JOINT_RIGHT_SHOULDER] << std::endl;
+	os << "RIGHT ELBOW : " << b.joints[JOINT_RIGHT_ELBOW] << std::endl;
+	os << "RIGHT HAND : " << b.joints[JOINT_RIGHT_HAND] << std::endl;
+	os << "RIGHT HIP : " << b.joints[JOINT_RIGHT_HIP] << std::endl;
+	os << "RIGHT KNEE : " << b.joints[JOINT_RIGHT_KNEE] << std::endl;
+	os << "RIGHT FOOT : " << b.joints[JOINT_RIGHT_FOOT] << std::endl;
+	*/
+	return os;
 }
 
 	/*
