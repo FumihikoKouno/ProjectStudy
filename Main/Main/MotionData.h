@@ -16,6 +16,7 @@ public:
 	void input(std::string s);
 	void reset();
 	void add(BodyDataNode& bd);
+	int size();
 	BodyDataNode& operator[](int i);
 	BodyDataNode& back();
 	void convert(MotionData& model, BodyDataNode& ret);

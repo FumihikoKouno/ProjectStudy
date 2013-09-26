@@ -11,6 +11,7 @@ public:
   double getX() const;
   double getY() const;
   double getZ() const;
+  void set(int nx, int ny, int nz);
   double dot(const ThreeDVector& v) const;
   double abs() const;
   ThreeDVector operator*(const double& d) const;

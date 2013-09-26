@@ -14,7 +14,7 @@
 int _tmain(int argc, _TCHAR* argv[])
 {
 	cv::setUseOptimized( true );
-
+	//
 	//add
 	std::ofstream outfs("test1.dat");
 	int key;
@@ -158,14 +158,7 @@ int _tmain(int argc, _TCHAR* argv[])
 							<<" "<<point.y
 							<<" "<<point.z<<std::endl;
 						}
-						tmp_body_data[position] = ThreeDVector(point.x,point.y,point.z);
-						/*
-						if(record_model){
-							model.joints[position] = ThreeDVector(point.x,point.y,point.z);
-						}else if(record_user){
-							mydata.joints[position] = ThreeDVector(point.x,point.y,point.z);
-						}
-						*/
+						tmp_body_data.joints[position] = ThreeDVector(point.x,point.y,point.z);
 						cv::Point2f registPoint;
 						userTracker.convertJointCoordinatesToDepth( point.x, point.y, point.z, &registPoint.x, &registPoint.y ); // Registration Joint Position to Depth
 						if(record_model) cv::circle( colorMat, registPoint, 10, static_cast<cv::Scalar>( color[count + 1] ), -1, CV_AA );
@@ -174,7 +167,6 @@ int _tmain(int argc, _TCHAR* argv[])
 						outfs<<std::endl;
 						// add data of this frame to model
 						model.add(tmp_body_data);
-						record_model = false;
 					}else if(record_user){
 						user.add(tmp_body_data);
 						if(idx < model.size()){
@@ -183,14 +175,8 @@ int _tmain(int argc, _TCHAR* argv[])
 							user.convert(model,view_node);
 							for( int position = 0; position < 15; position++ ){
 								cv::Point2f registPoint2;
-								int z_diff = (view_node.joints[position].getZ()-user.joints[position].getZ());
-								if(z_diff < -255) z_diff = -255;
-								if(z_diff > 255) z_diff = 255;
-								int z_diff_abs;
-								if(z_diff < 0) z_diff_abs = -z_diff;
-								else z_diff_abs = z_diff;
-								userTracker.convertJointCoordinatesToDepth( view_node.joints[position].getX(), view_node.joints[position].getY(), view_node.joints[position].getZ(), &registPoint2.x, &registPoint2.y ); // Registration Joint Position to Depth
-								cv::circle( colorMat1, registPoint2, 16+z_diff/16, static_cast<cv::Scalar>( cv::Vec3b(z_diff_abs,0,255-z_diff_abs) ), -1, CV_AA );
+								userTracker.convertJointCoordinatesToDepth( (float)view_node.joints[position].getX(), (float)view_node.joints[position].getY(), (float)view_node.joints[position].getZ(), &registPoint2.x, &registPoint2.y ); // Registration Joint Position to Depth
+								cv::circle( colorMat1, registPoint2, 10, static_cast<cv::Scalar>( color[count + 1] ), -1, CV_AA );
 							}
 						}else{
 							record_user = false;
@@ -206,10 +192,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		if(record_user){cv::imshow( "Picture", colorMat1 );}
 		//cv::imshow( "User", userMat );
 		//cv::imshow( "Skeleton", skeletonMat );
-	    if(record_model){ 
-			std::cout<<"There is no person."<<std::endl;
-			rec_model = false;
-		}
 		key=cv::waitKey( 30 );
 		// Press the Escape key to Exit
 		if( key == VK_ESCAPE ){

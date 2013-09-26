@@ -16,6 +16,13 @@ double ThreeDVector::dot(const ThreeDVector& v) const {
 double ThreeDVector::abs() const {
   return sqrt(x*x+y*y+z*z);
 }
+void ThreeDVector::set(int nx, int ny, int nz){
+	x = nx;
+	y = ny;
+	z = nz;
+}
+
+
 ThreeDVector ThreeDVector::cross(const ThreeDVector& v) const {
   ThreeDVector tmp;
   tmp.x = y*v.z-z*v.y;

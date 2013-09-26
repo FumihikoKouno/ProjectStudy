@@ -1,4 +1,4 @@
-#include <fstream>
+
 
 #include "stdafx.h"
 #include "NiteEnums.h"
@@ -16,27 +16,35 @@ BodyDataNode& MotionData::back(){ return data.back(); }
 
 void MotionData::output(std::string s){
 	std::ofstream out(s);
-	dump(s);
+	dump(out);
+}
+
+int MotionData::size(){
+	return data.size();
 }
 
 void MotionData::input(std::string s){
 	reset();
-	std::ifsteram in(s);
+	std::ifstream in(s);
 	if(!in){
 		// cannot open file
 		return;
 	}
 	while(!in.eof()){
 		BodyDataNode tmp;
+		int x,y,z;
 		for(int i = 0; i < 15; i++){
-			in >> tmp.joints[i];
+			in >> x;
+			in >> y;
+			in >> z;
+			tmp.joints[i].set(x,y,z);
 		}
 		data.push_back(tmp);
 	}
 }
 
 std::ostream& MotionData::dump(std::ostream& os) const{
-	for(int i = 0; i < data.size(); i++){
+	for(unsigned int i = 0; i < data.size(); i++){
 		os << data[i];
 	}
 	return os;
@@ -52,7 +60,7 @@ void MotionData::convert_all(MotionData& model, MotionData& ret){
 	ret.reset();
 	BodyDataNode tmp;
 	ThreeDVector diff = data[0].joints[JOINT_TORSO]-model[0].joints[JOINT_TORSO];
-	for(int i = 0; i < data.size(); i++){
+	for(unsigned int i = 0; i < data.size(); i++){
 		data[i].convert(model[i],diff,tmp);
 		ret.add(tmp);
 	}
