@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 #include <tchar.h>
-
+#include <fstream>
 
 
 // TODO: プログラムに必要な追加ヘッダーをここで参照してください。
