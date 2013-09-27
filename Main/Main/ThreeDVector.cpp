@@ -72,6 +72,7 @@ ThreeDVector& ThreeDVector::operator+=(const ThreeDVector& v){
 }
 ThreeDVector ThreeDVector::operator-(const ThreeDVector& v) const {
   ThreeDVector tmp;
+
   tmp.x = x - v.x;
   tmp.y = y - v.y;
   tmp.z = z - v.z;

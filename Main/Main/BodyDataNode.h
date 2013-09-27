@@ -13,8 +13,6 @@
 class BodyDataNode{
 public:
 	BodyDataNode();
-//	BodyDataNode(double x,double y, double z);
-//	BodyDataNode(ThreeDVector tv, Quaternion q);
 	~BodyDataNode();
 // modelのデータを参考にretの関節toの座標をfromの座標から計算し、代入する。
   void make_next(BodyDataNode& ret, BodyDataNode& model, int from, int to);
@@ -35,11 +33,6 @@ public:
 //	void add_children(double x,double y, double z);
 
 private:
-//  static ThreeDVector diff;
-//  static bool first;
-//	ThreeDVector tv;
-//	std::vector<BodyDataNode*> children;
-//	Quaternion q;
 };
 
 std::ostream& operator<<(std::ostream& os, const BodyDataNode& b);

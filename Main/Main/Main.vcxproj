@@ -86,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BodyDataNode.h" />
+    <ClInclude Include="KinectIO.h" />
     <ClInclude Include="MotionData.h" />
     <ClInclude Include="OpenCVHeader.h" />
     <ClInclude Include="stdafx.h" />
@@ -94,6 +95,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BodyDataNode.cpp" />
+    <ClCompile Include="KinectIO.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MotionData.cpp" />
     <ClCompile Include="stdafx.cpp">
