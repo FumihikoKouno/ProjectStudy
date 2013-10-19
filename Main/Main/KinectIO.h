@@ -16,7 +16,7 @@ public:
 	void setVideo(cv::Mat& mat);
 	void rec(std::vector<MotionData>& data, cv::Mat& colorMat, cv::Mat&depthMat, bool show);
 	nite::UserTracker& getUserTracker();
-
+	void update();
 private:
 	openni::Status statusOpenNI;
 	openni::Device device;
