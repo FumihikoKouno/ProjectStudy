@@ -50,6 +50,7 @@ int _tmain(int argc, _TCHAR* argv[])
 //			outfs<<std::endl;
 			// add data of this frame to model
 			kio.rec(model,colorMat,depthMat,true);
+			
 		}else if(record_user){
 			kio.rec(user,colorMat,depthMat,false);
 			if(user.size() == model.size()){
@@ -94,6 +95,8 @@ int _tmain(int argc, _TCHAR* argv[])
 			}else{
 				record_model = false;
 				std::cout<<"record stop"<<std::endl;
+				//std::cout<<model[0];
+				outfs<<model[0];
 			}
 		}else if(key == VK_RETURN){
 			if(!record_user){
