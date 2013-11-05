@@ -24,7 +24,10 @@ int _tmain(int argc, _TCHAR* argv[])
 
 //	BodyDataNode model,mydata,goal;
 	KinectIO kio;
-	kio.init();
+	if(!kio.init()){
+		std::cout << "error init" << std::endl;
+		return 0;
+	}
 
 	cv::Mat colorMat;
 	cv::Mat depthMat;
@@ -46,10 +49,14 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	std::cout<<"start"<<std::endl;
 	while(true){
+		kio.update();
 		if(record_model){
 //			outfs<<std::endl;
 			// add data of this frame to model
 			kio.rec(model,colorMat,depthMat,true);
+			//std::cout << "test" << std::endl;
+			std::cout << kio.getUserNumber() << std::endl;
+//			for(int i = 0; i < model.size(); i++) std::cout << model[i] << std::endl;
 		}else if(record_user){
 			kio.rec(user,colorMat,depthMat,false);
 			if(user.size() == model.size()){
