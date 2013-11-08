@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include <opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp> 
 #include "BodyDataNode.h"
 #include "MotionData.h"
 #include <vector>
