@@ -11,15 +11,14 @@
 
 #include <fstream>
 
-int main(int argc, char* argv[])//int _tmain(int argc, _TCHAR* argv[])
+//int main(int argc, char* argv[])//
+int _tmain(int argc, _TCHAR* argv[])
 {
-	//第一引数は出力ファイルのファイル名
-
 	cv::setUseOptimized( true );
 	//
 	//add
 	std::string outdata, message_str="STOP";
-	argc> 1 ? outdata = (std::string)argv[1] : outdata="test1.dat";
+	outdata="test1.dat";
 	std::ofstream outfs;
 	outfs.open(outdata);
 
@@ -109,7 +108,11 @@ int main(int argc, char* argv[])//int _tmain(int argc, _TCHAR* argv[])
 				//std::cout<<model[0];
 				///outfs<<model[0];
 				id=MessageBox(NULL, L"保存しますか？", L"データの保存", MB_YESNO);
-				if(id == IDYES)outfs<<model[0];
+				if(id == IDYES){
+					//DialogBox(hInstance, MAKEINTRESOURCE(IDD_MYDIALOG),NULL, DlgProc);
+					if(model.empty())MessageBox(NULL, L"モデルは取れませんでした。", L"no human",0) ;
+					else outfs<<model[0];
+				}
 			}
 		}else if(key == VK_RETURN){
 			if(!record_user){
@@ -123,6 +126,11 @@ int main(int argc, char* argv[])//int _tmain(int argc, _TCHAR* argv[])
 				record_user = false;
 				std::cout<<"myrec stop"<<std::endl;
 			}
+		}else if(key == 'A'){
+			message=1-message;
+		}else if(key == 'h'){
+			
+			MessageBox(NULL, L"スペースキーで録画開始と終了。\n 「A」で右上の文字の消去、生成", L"ヘルプ", MB_OK);
 		}
 		if(message)
 				cv::putText(colorMat, message_str, cvPoint(colorMat.cols*4/5,colorMat.rows/8), CV_FONT_HERSHEY_SIMPLEX, 1.0f, CV_RGB(0,255,0),2,CV_AA);

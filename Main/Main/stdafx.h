@@ -11,6 +11,7 @@
 #include <iostream>
 #include <tchar.h>
 #include <fstream>
+#include <Windows.h>
 
 
 // TODO: プログラムに必要な追加ヘッダーをここで参照してください。
