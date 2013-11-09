@@ -59,6 +59,11 @@ int _tmain(int argc, _TCHAR* argv[])
 			kio.rec(model,colorMat,depthMat,true);
 			
 		}else if(record_user){
+			if(model.empty()){
+				record_user = false;
+				MessageBox(NULL, L"モデルデータが入力されていません", L"model error",0);
+				continue;
+			}
 			kio.rec(user,colorMat,depthMat,false);
 			if(user.size() == model.size()){
 				// user data of this frame convert to goal from model[idx]
