@@ -121,17 +121,14 @@ void KinectIO::rec(std::vector<MotionData>& data, cv::Mat& colorMat, cv::Mat& de
 	// Retrieve Skeleton Frame from UserTracker
 //		skeletonMat = cv::Mat( height, width, CV_8UC3, cv::Scalar( 255, 255, 255 ) );
 	const nite::Array<nite::UserData>& users = userFrame.getUsers(); // Retrieve User from User Frame
-//	if(users.getSize()!=data.size())return;
+
 	/**
 		* TODO : If we assume only a model, this for loop is unnecessary
 		*/
-	std::cout << "before for : " << users.getSize() << std::endl;
 	for( int count = 0; count < users.getSize(); count++ ){
-		std::cout << "in for : " << count << "," << users.getSize() << std::endl;
 		// Start Skeleton Tracking a new User
 		if( users[count].isNew() ){
 			userTracker.startSkeletonTracking( users[count].getId() );
-			std::cout << "test" << std::endl;
 		}
 		// Retrieve Skeleton from Tracking User ( who is Not Lost and Visible User )
 		else if( !users[count].isLost() && users[count].isVisible() ){
@@ -146,9 +143,7 @@ void KinectIO::rec(std::vector<MotionData>& data, cv::Mat& colorMat, cv::Mat& de
 					userTracker.convertJointCoordinatesToDepth( point.x, point.y, point.z, &registPoint.x, &registPoint.y ); // Registration Joint Position to Depth
 					if(show) cv::circle( colorMat, registPoint, 10, static_cast<cv::Scalar>( color[count + 1] ), -1, CV_AA );
 				}
-				std::cout << "tmp : " << tmp_body_data << std::endl;
 				data[count].add(tmp_body_data);
-				std::cout << "data : " << data[count].back() << std::endl;
 			}
 		}
 	}
@@ -157,29 +152,10 @@ void KinectIO::rec(std::vector<MotionData>& data, cv::Mat& colorMat, cv::Mat& de
 
 nite::UserTracker& KinectIO::getUserTracker(){ return userTracker; }
 
-void KinectIO::update(){
-	nite::UserTrackerFrameRef userFrame;
-	userTracker.readFrame( &userFrame ); // Retrive a Frame form Tracker
-	const nite::Array<nite::UserData>& users = userFrame.getUsers();
-	for(int count = 0; count < users.getSize(); count++){
-		if( users[count].isNew() ){
-			std::cout << "test" << std::endl;
-			userTracker.startSkeletonTracking( users[count].getId() );
-		}
-	}
-}
-
 int KinectIO::getUserNumber(){
 	nite::UserTrackerFrameRef userFrame;
 	userTracker.readFrame( &userFrame ); // Retrive a Frame form Tracker
-	const nite::Array<nite::UserData>& users = userFrame.getUsers();
-	for(int count = 0; count < users.getSize(); count++){
-		if( users[count].isNew() ){
-			std::cout << "test" << std::endl;
-			userTracker.startSkeletonTracking( users[count].getId() );
-		}
-	}
-	return users.getSize();
+	return userFrame.getUsers().getSize();
 }
 
 bool KinectIO::init(){
