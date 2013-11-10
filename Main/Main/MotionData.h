@@ -17,6 +17,7 @@ public:
 	void reset();
 	void add(BodyDataNode& bd);
 	int size();
+	int capacity();
 	BodyDataNode& operator[](int i);
 	BodyDataNode& back();
 	void convert(MotionData& model, BodyDataNode& ret);

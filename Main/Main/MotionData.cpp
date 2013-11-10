@@ -23,6 +23,10 @@ int MotionData::size(){
 	return data.size();
 }
 
+int MotionData::capacity(){
+	return data.capacity();
+}
+
 void MotionData::input(std::string s){
 	reset();
 	std::ifstream in(s);

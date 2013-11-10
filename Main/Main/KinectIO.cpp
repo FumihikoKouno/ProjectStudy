@@ -17,12 +17,60 @@ KinectIO::~KinectIO(void)
 }
 
 void KinectIO::setVideo(cv::Mat& mat){	
+		// Table of Colors
+	cv::Vec3b color[7];
+	color[0]  = cv::Vec3b( 255, 255, 255 );
+	color[1]  = cv::Vec3b( 255,   0,   0 );
+	color[2]  = cv::Vec3b(   0, 255,   0 );
+	color[3]  = cv::Vec3b(   0,   0, 255 );
+	color[4]  = cv::Vec3b( 255, 255,   0 );
+	color[5]  = cv::Vec3b( 255,   0, 255 );
+	color[6]  = cv::Vec3b(   0, 255, 255 );
+
 	openni::VideoFrameRef colorFrame;
 	colorStream.readFrame( &colorFrame ); // Retrieve a Frame from Stream
 	if( colorFrame.isValid() ){
 		mat = cv::Mat( colorStream.getVideoMode().getResolutionY(), colorStream.getVideoMode().getResolutionX(), CV_8UC3, reinterpret_cast<uchar*>( const_cast<void*>( colorFrame.getData() ) ) ); // Retrieve a Data from Frame 
 		cv::cvtColor( mat, mat, CV_RGB2BGR ); // Change the order of the pixel RGB to BGR
 	}
+	//////
+		// Retrieve User Frame from UserTracker
+	nite::UserTrackerFrameRef userFrame;
+	userTracker.readFrame( &userFrame ); // Retrive a Frame form Tracker
+	const nite::UserId* pUserId = userFrame.getUserMap().getPixels(); // Retrive UserId from Frame
+	int width = userFrame.getUserMap().getWidth();
+	int height = userFrame.getUserMap().getHeight();
+		// Retrieve Skeleton Frame from UserTracker
+//		skeletonMat = cv::Mat( height, width, CV_8UC3, cv::Scalar( 255, 255, 255 ) );
+	const nite::Array<nite::UserData>& users = userFrame.getUsers(); // Retrieve User from User Frame
+
+	/**
+		* TODO : If we assume only a model, this for loop is unnecessary
+		*/
+	for( int count = 0; count < users.getSize(); count++ ){
+		// Start Skeleton Tracking a new User
+		if( users[count].isNew() ){
+			userTracker.startSkeletonTracking( users[count].getId() );
+		}
+		// Retrieve Skeleton from Tracking User ( who is Not Lost and Visible User )
+		else if( !users[count].isLost() && users[count].isVisible() ){
+			const nite::Skeleton& skeleton = users[count].getSkeleton(); // Retrieve Skeleton form User
+			if( skeleton.getState() == nite::SkeletonState::SKELETON_TRACKED ){
+				BodyDataNode tmp_body_data;
+				for( int position = 0; position < 15; position++ ){//20?
+					const nite::SkeletonJoint& joint = skeleton.getJoint((nite::JointType)position); // Retrieve Joint from Skeleton ( Total 14 joint )
+					const nite::Point3f& point = joint.getPosition(); // Retrieve three-dimensional position of the Joint
+					tmp_body_data.joints[position] = ThreeDVector(point.x,point.y,point.z);
+					cv::Point2f registPoint;
+					userTracker.convertJointCoordinatesToDepth( point.x, point.y, point.z, &registPoint.x, &registPoint.y ); // Registration Joint Position to Depth
+					cv::circle( mat, registPoint, 10, static_cast<cv::Scalar>( color[count + 1] ), -1, CV_AA );
+				}
+				
+			}
+		}
+	}
+
+	//////
 }
 
 void KinectIO::rec(std::vector<MotionData>& data, cv::Mat& colorMat, cv::Mat& depthMat, bool show){
@@ -64,7 +112,7 @@ void KinectIO::rec(std::vector<MotionData>& data, cv::Mat& colorMat, cv::Mat& de
 	if( userFrame.isValid() ){
 		for(int y = 0; y < height; y++ ){
 			for(int x = 0; x < width; x++ ){
-//					userMat.at<cv::Vec3b>( y, x ) = color[*pUserId];
+//					colorMat.at<cv::Vec3b>( y, x ) = color[*pUserId];
 				pUserId++;
 			}
 		}
