@@ -17,10 +17,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	cv::setUseOptimized( true );
 	//
 	//add
-	std::string outdata, message_str="STOP";
-	outdata="test1.dat";
+	std::wstring outdata;
+	std::string message_str="STOP";
+	outdata=L"test1.dat";
 	std::ofstream outfs;
-	outfs.open(outdata);
+	
 
 	int key,id;
 	int message=1;
@@ -35,6 +36,8 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	cv::Mat colorMat;
 	cv::Mat depthMat;
+
+	mywindow window;
 
 	cv::namedWindow( "Main", cv::WINDOW_AUTOSIZE );
 //	cv::namedWindow( "Picture", cv::WINDOW_AUTOSIZE );
@@ -116,7 +119,12 @@ int _tmain(int argc, _TCHAR* argv[])
 				if(id == IDYES){
 					//DialogBox(hInstance, MAKEINTRESOURCE(IDD_MYDIALOG),NULL, DlgProc);
 					if(model.empty())MessageBox(NULL, L"ÉÇÉfÉãÇÕéÊÇÍÇ‹ÇπÇÒÇ≈ÇµÇΩÅB", L"no human",0) ;
-					else outfs<<model[0];
+					else {
+						outdata=window.filesave();
+						outfs.open(outdata);
+						outfs<<model[0];
+						outfs.close();
+					}
 				}
 			}
 		}else if(key == VK_RETURN){
