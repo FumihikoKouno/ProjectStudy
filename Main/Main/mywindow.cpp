@@ -41,3 +41,28 @@ std::wstring mywindow::filesave(void)
 
 	return name;
 }
+
+std::wstring mywindow::fileopen(void){
+	static OPENFILENAME     ofn;
+    static TCHAR            szPath[ MAX_PATH ];
+    static TCHAR            szFile[ MAX_PATH ];
+    
+    if ( szPath[0] == TEXT('\0') ){
+        GetCurrentDirectory( MAX_PATH, szPath );
+    }
+    if ( ofn.lStructSize == 0 ){
+        ofn.lStructSize         = sizeof(OPENFILENAME);
+        ofn.hwndOwner           = NULL;
+        ofn.lpstrInitialDir     = szPath;       // 初期フォルダ位置
+        ofn.lpstrFile           = szFile;       // 選択ファイル格納
+        ofn.nMaxFile            = MAX_PATH;
+        ofn.lpstrDefExt         = TEXT(".dat");
+        ofn.lpstrFilter         = TEXT("datファイル(*.dat)\0*.dat\0");
+        ofn.lpstrTitle          = TEXT("モデルデータを開きます。");
+        ofn.Flags               = OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
+    }
+    if ( GetOpenFileName(&ofn) ){
+
+    }
+	return szFile;
+}

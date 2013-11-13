@@ -7,5 +7,6 @@ public:
 	~mywindow(void);
 	HINSTANCE hInst;
 	std::wstring filesave(void);
+	std::wstring fileopen(void);
 };
 
