@@ -65,17 +65,25 @@ int _tmain(int argc, _TCHAR* argv[])
 			kio.rec(user,colorMat,depthMat,false);
 			// user data of this frame convert to goal from model[idx]
 			if(!user.empty()){
+				while(user.size()>goal.size())goal.push_back(MotionData());
 				BodyDataNode view_node;
 				for(unsigned int i = 0; i < user.size(); i++){
 					if(user[i].size()!=0){
-						user[i].convert(model[0],view_node);//model[0]の動きをまねるようにする
-						for( int position = 0; position < 15; position++ ){
-							cv::Point2f registPoint2;
-							kio.getUserTracker().convertJointCoordinatesToDepth( (float)view_node.joints[position].getX(), (float)view_node.joints[position].getY(), (float)view_node.joints[position].getZ(), &registPoint2.x, &registPoint2.y ); // Registration Joint Position to Depth
-							if(registPoint2.x==0&&registPoint2.y==0){
-								kio.getUserTracker().convertJointCoordinatesToDepth( (float)user[i].back().joints[position].getX(), (float)user[i].back().joints[position].getY(), (float)user[i].back().joints[position].getZ(), &registPoint2.x, &registPoint2.y ); 
+						if(model[0].size()>user[i].size()){
+							user[i].convert(model[0],view_node);//model[0]の動きをまねるようにする
+							for( int position = 0; position < 15; position++ ){
+								cv::Point2f registPoint2;
+								kio.getUserTracker().convertJointCoordinatesToDepth( (float)view_node.joints[position].getX(), (float)view_node.joints[position].getY(), (float)view_node.joints[position].getZ(), &registPoint2.x, &registPoint2.y ); // Registration Joint Position to Depth
+								cv::circle( colorMat, registPoint2, 10, static_cast<cv::Scalar>( color[i] ), -1, CV_AA );
 							}
-							cv::circle( colorMat, registPoint2, 10, static_cast<cv::Scalar>( color[i] ), -1, CV_AA );
+							goal[i].add(view_node);
+						}else{
+							for( int position = 0; position < 15; position++ ){
+								cv::Point2f registPoint2;
+								kio.getUserTracker().convertJointCoordinatesToDepth( (float)user[i].back().joints[position].getX(), (float)user[i].back().joints[position].getY(), (float)user[i].back().joints[position].getZ(), &registPoint2.x, &registPoint2.y ); 
+								cv::circle( colorMat, registPoint2, 10, static_cast<cv::Scalar>( color[i] ), -1, CV_AA );
+							}
+							
 						}
 					}
 				}
@@ -155,7 +163,7 @@ int _tmain(int argc, _TCHAR* argv[])
 				message_str = "REC(U)";
 				MessageBox(NULL, L"ユーザの録画を開始します。", L"start",0);
 				user.clear();
-				goal.clear;
+				goal.clear();
 				for(int i = 0; i < kio.getUserNumber(); i++){
 					user.push_back(MotionData());
 				}
@@ -174,26 +182,42 @@ int _tmain(int argc, _TCHAR* argv[])
 						outfs<<user[0];
 						outfs.close();
 						std::wcout<<L"u:"<<outdata<<std::endl;
-						//二人目以降のデータを出力させる。*_2.datみたいなファイルで出力させておく
-						//ToDo::出てきた人の人数を把握する関数、wstringの末尾に数字をくっつけられる関数の把握
-						//std::cout<<user.size()<<std::endl;
+						if(user.size()>1){
+							id=MessageBox(NULL, L"二人目以降のモデルデータも保存しますか？", L"データの保存", MB_YESNO);
+							if(id= IDYES){
+								for(int i=1;i<user.size();i++){
+									outdata=window.filesave();
+									outfs.open(outdata);
+									outfs<<user[i];
+									outfs.close();
+								}
+							}
+						}
 					}
 				}
-				/*id=MessageBox(NULL, L"あなたの体に合ったモデルデータの動きを保存しますか？", L"ユーザに合ったモデルデータの保存", MB_YESNO);
+				id=MessageBox(NULL, L"あなたの体に合ったモデルデータの動きを保存しますか？", L"ユーザに合ったモデルデータの保存", MB_YESNO);
 				if(id == IDYES){
 					//DialogBox(hInstance, MAKEINTRESOURCE(IDD_MYDIALOG),NULL, DlgProc);
 					if(user.empty())MessageBox(NULL, L"ユーザモデルは取れませんでした。", L"no human",0) ;
 					else {
 						outdata=window.filesave();
 						outfs.open(outdata);
-						outfs<<user[0];
+						outfs<<goal[0];
 						outfs.close();
 						std::wcout<<L"um:"<<outdata<<std::endl;
-						//二人目以降のデータを出力させる。*_2.datみたいなファイルで出力させておく
-						//ToDo::出てきた人の人数を把握する関数、wstringの末尾に数字をくっつけられる関数の把握
-						//std::cout<<user.size()<<std::endl;
+						if(goal.size()>1){
+							id=MessageBox(NULL, L"二人目以降のモデルデータも保存しますか？", L"データの保存", MB_YESNO);
+							if(id= IDYES){
+								for(int i=1;i<goal.size();i++){
+									outdata=window.filesave();
+									outfs.open(outdata);
+									outfs<<goal[i];
+									outfs.close();
+								}
+							}
+						}
 					}
-				}*/
+				}
 			}
 		}else if(key == 'A'){
 			message=1-message;
