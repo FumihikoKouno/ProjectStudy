@@ -46,7 +46,7 @@ void MotionData::input(std::wstring s,std::vector<MotionData>& data1){
 		}
 		data1.push_back(MotionData());
 		data1[0].add(tmp);
-	}std::cout<<"while"<<std::endl;
+	}
 	in.close();
 	return;
 }

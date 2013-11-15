@@ -68,10 +68,13 @@ int _tmain(int argc, _TCHAR* argv[])
 				BodyDataNode view_node;
 				for(unsigned int i = 0; i < user.size(); i++){
 					if(user[i].size()!=0){
-						user[i].convert(model[0],view_node);
+						user[i].convert(model[0],view_node);//model[0]の動きをまねるようにする
 						for( int position = 0; position < 15; position++ ){
 							cv::Point2f registPoint2;
 							kio.getUserTracker().convertJointCoordinatesToDepth( (float)view_node.joints[position].getX(), (float)view_node.joints[position].getY(), (float)view_node.joints[position].getZ(), &registPoint2.x, &registPoint2.y ); // Registration Joint Position to Depth
+							if(registPoint2.x==0&&registPoint2.y==0){
+								kio.getUserTracker().convertJointCoordinatesToDepth( (float)user[i].back().joints[position].getX(), (float)user[i].back().joints[position].getY(), (float)user[i].back().joints[position].getZ(), &registPoint2.x, &registPoint2.y ); 
+							}
 							cv::circle( colorMat, registPoint2, 10, static_cast<cv::Scalar>( color[i] ), -1, CV_AA );
 						}
 					}
@@ -122,6 +125,17 @@ int _tmain(int argc, _TCHAR* argv[])
 						//二人目以降のデータを出力させる。*_2.datみたいなファイルで出力させておく
 						//ToDo::出てきた人の人数を把握する関数、wstringの末尾に数字をくっつけられる関数の把握
 						//std::cout<<model.size()<<std::endl;
+						if(model.size()>1){
+							id=MessageBox(NULL, L"二人目以降のモデルデータも保存しますか？", L"データの保存", MB_YESNO);
+							if(id= IDYES){
+								for(int i=1;i<model.size();i++){
+									outdata=window.filesave();
+									outfs.open(outdata);
+									outfs<<model[i];
+									outfs.close();
+								}
+							}
+						}
 					}
 				}
 			}
@@ -141,15 +155,16 @@ int _tmain(int argc, _TCHAR* argv[])
 				message_str = "REC(U)";
 				MessageBox(NULL, L"ユーザの録画を開始します。", L"start",0);
 				user.clear();
+				goal.clear;
 				for(int i = 0; i < kio.getUserNumber(); i++){
 					user.push_back(MotionData());
 				}
-				std::cout<<"myrec"<<std::endl;
+				//std::cout<<"myrec"<<std::endl;
 			}else{
 				record_user = false;
 				message_str = "STOP";
-				std::cout<<"myrec stop"<<std::endl;
-				id=MessageBox(NULL, L"保存しますか？", L"ユーザデータの保存", MB_YESNO);
+				//std::cout<<"myrec stop"<<std::endl;
+				id=MessageBox(NULL, L"今の動きを保存しますか？", L"ユーザデータの保存", MB_YESNO);
 				if(id == IDYES){
 					//DialogBox(hInstance, MAKEINTRESOURCE(IDD_MYDIALOG),NULL, DlgProc);
 					if(user.empty())MessageBox(NULL, L"ユーザモデルは取れませんでした。", L"no human",0) ;
@@ -164,15 +179,30 @@ int _tmain(int argc, _TCHAR* argv[])
 						//std::cout<<user.size()<<std::endl;
 					}
 				}
+				/*id=MessageBox(NULL, L"あなたの体に合ったモデルデータの動きを保存しますか？", L"ユーザに合ったモデルデータの保存", MB_YESNO);
+				if(id == IDYES){
+					//DialogBox(hInstance, MAKEINTRESOURCE(IDD_MYDIALOG),NULL, DlgProc);
+					if(user.empty())MessageBox(NULL, L"ユーザモデルは取れませんでした。", L"no human",0) ;
+					else {
+						outdata=window.filesave();
+						outfs.open(outdata);
+						outfs<<user[0];
+						outfs.close();
+						std::wcout<<L"um:"<<outdata<<std::endl;
+						//二人目以降のデータを出力させる。*_2.datみたいなファイルで出力させておく
+						//ToDo::出てきた人の人数を把握する関数、wstringの末尾に数字をくっつけられる関数の把握
+						//std::cout<<user.size()<<std::endl;
+					}
+				}*/
 			}
 		}else if(key == 'A'){
 			message=1-message;
 		}else if(key == 'h'){
 			
-			MessageBox(NULL, L"スペースキーで録画開始と終了。\n 「A」で右上の文字の消去、生成", L"ヘルプ", MB_OK);
+			MessageBox(NULL, L"「o」でモデルデータのファイルを開く\n「space」でモデルデータの録画開始と終了\n「Enter」でユーザデータの録画開始と終了\n「shift+a」で右上の文字の消去、生成\n「Esc」でアプリケーション終了", L"ヘルプ", MB_OK);
 		}else if(key == 'o'){
 			indata=window.fileopen();
-			std::wcout<<L"open:"<<indata<<std::endl;
+			//std::wcout<<L"open:"<<indata<<std::endl;
 			
 			data.input(indata,model);
 		}

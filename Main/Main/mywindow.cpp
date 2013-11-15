@@ -31,11 +31,11 @@ std::wstring mywindow::filesave(void)
         ofn.nMaxFile            = MAX_PATH;
         ofn.lpstrDefExt         = TEXT(".dat");
         ofn.lpstrFilter         = TEXT("datファイル(*.dat)\0*.dat\0");
-        ofn.lpstrTitle          = TEXT("モデルデータを保存します。");
+        ofn.lpstrTitle          = TEXT("データを保存します。");
         ofn.Flags               = OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
     }
     if ( GetSaveFileName(&ofn) ){
-        MessageBox( NULL, szFile, TEXT("ファイル名を付けて保存"), MB_OK );
+        //MessageBox( NULL, szFile, TEXT("ファイル名を付けて保存"), MB_OK );
 		name=szFile;
     }
 
