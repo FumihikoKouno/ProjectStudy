@@ -29,7 +29,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	std::vector<MotionData> model, user, goal;
 	MotionData data;
 //	BodyDataNode user, goal;
-
+	//std::cout<<"start"<<std::endl;
 //	BodyDataNode model,mydata,goal;
 	KinectIO kio;
 	kio.init();
@@ -204,7 +204,7 @@ int _tmain(int argc, _TCHAR* argv[])
 						outfs.open(outdata);
 						outfs<<goal[0];
 						outfs.close();
-						std::wcout<<L"um:"<<outdata<<std::endl;
+						std::wcout<<L"c:"<<outdata<<std::endl;
 						if(goal.size()>1){
 							id=MessageBox(NULL, L"二人目以降のモデルデータも保存しますか？", L"データの保存", MB_YESNO);
 							if(id= IDYES){
