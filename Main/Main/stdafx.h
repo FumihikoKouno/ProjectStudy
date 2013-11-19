@@ -12,6 +12,7 @@
 #include <tchar.h>
 #include <fstream>
 #include <Windows.h>
+#include "mywindow.h"
 
 
 // TODO: プログラムに必要な追加ヘッダーをここで参照してください。
