@@ -1,0 +1,24 @@
+﻿2013/11/19 14:17:40 にビルドを開始しました。
+     1>ノード 2 上のプロジェクト "C:\Users\Uedalab\Desktop\git_project\ProjectStudy\Main\Main\Main.vcxproj" (Build ターゲット)。
+     1>ClCompile:
+         C:\Program Files\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\Program Files\OpenNI2\Include\\" /I"C:\Program Files\PrimeSense\NiTE2\Include\\" /I"C:/Program Files\opencv\build\include" /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\Main.pch" /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Main.cpp
+         Main.cpp
+     1>Main.cpp(139): warning C4018: '<' : signed と unsigned の数値を比較しようとしました。
+     1>Main.cpp(188): warning C4018: '<' : signed と unsigned の数値を比較しようとしました。
+     1>Main.cpp(211): warning C4018: '<' : signed と unsigned の数値を比較しようとしました。
+       Link:
+         C:\Program Files\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Uedalab\Desktop\git_project\ProjectStudy\Main\Release\Main.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"C:\Program Files\OpenNI2\Lib\\" /LIBPATH:"C:\Program Files\PrimeSense\NiTE2\Lib\\" /LIBPATH:"C:/Program Files\opencv\build\x86\vc11\lib" OpenNI2.lib NiTE2.lib opencv_core245.lib opencv_highgui245.lib opencv_imgproc245.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Uedalab\Desktop\git_project\ProjectStudy\Main\Release\Main.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Uedalab\Desktop\git_project\ProjectStudy\Main\Release\Main.lib" /MACHINE:X86 /SAFESEH Release\BodyDataNode.obj
+         Release\KinectIO.obj
+         Release\Main.obj
+         Release\MotionData.obj
+         Release\mywindow.obj
+         Release\stdafx.obj
+         Release\ThreeDVector.obj
+         コード生成しています。
+         コード生成が終了しました。
+         Main.vcxproj -> C:\Users\Uedalab\Desktop\git_project\ProjectStudy\Main\Release\Main.exe
+     1>プロジェクト "C:\Users\Uedalab\Desktop\git_project\ProjectStudy\Main\Main\Main.vcxproj" (Build ターゲット) のビルドが完了しました。
+
+ビルドに成功しました。
+
+経過時間 00:00:14.29
