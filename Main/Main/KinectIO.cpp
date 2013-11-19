@@ -121,7 +121,7 @@ void KinectIO::rec(std::vector<MotionData>& data, cv::Mat& colorMat, cv::Mat& de
 	// Retrieve Skeleton Frame from UserTracker
 //		skeletonMat = cv::Mat( height, width, CV_8UC3, cv::Scalar( 255, 255, 255 ) );
 	const nite::Array<nite::UserData>& users = userFrame.getUsers(); // Retrieve User from User Frame
-
+	while(users.getSize()>data.size())data.push_back(MotionData());
 	/**
 		* TODO : If we assume only a model, this for loop is unnecessary
 		*/

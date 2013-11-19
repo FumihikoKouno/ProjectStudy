@@ -88,6 +88,7 @@
     <ClInclude Include="BodyDataNode.h" />
     <ClInclude Include="KinectIO.h" />
     <ClInclude Include="MotionData.h" />
+    <ClInclude Include="mywindow.h" />
     <ClInclude Include="OpenCVHeader.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -98,6 +99,7 @@
     <ClCompile Include="KinectIO.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MotionData.cpp" />
+    <ClCompile Include="mywindow.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

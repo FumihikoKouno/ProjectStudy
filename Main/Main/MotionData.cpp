@@ -27,24 +27,28 @@ int MotionData::capacity(){
 	return data.capacity();
 }
 
-void MotionData::input(std::string s){
+void MotionData::input(std::wstring s,std::vector<MotionData>& data1){
 	reset();
-	std::ifstream in(s);
+	std::ifstream in;
+	in.open(s);
 	if(!in){
 		// cannot open file
 		return;
 	}
 	while(!in.eof()){
 		BodyDataNode tmp;
-		int x,y,z;
+		float x,y,z;
 		for(int i = 0; i < 15; i++){
 			in >> x;
 			in >> y;
 			in >> z;
 			tmp.joints[i].set(x,y,z);
 		}
-		data.push_back(tmp);
+		data1.push_back(MotionData());
+		data1[0].add(tmp);
 	}
+	in.close();
+	return;
 }
 
 std::ostream& MotionData::dump(std::ostream& os) const{
