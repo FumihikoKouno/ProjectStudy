@@ -100,7 +100,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		//cv::imshow( "Skeleton", skeletonMat );
 		key=cv::waitKey( 30 );
 		// Press the Escape key to Exit
-		if( key == VK_ESCAPE ){
+		if( key == VK_ESCAPE || key == 'q' ){
 			break;
 		}else if( key == VK_SPACE){
 			if(record_user){
@@ -175,7 +175,10 @@ int _tmain(int argc, _TCHAR* argv[])
 				id=MessageBox(NULL, L"今の動きを保存しますか？", L"ユーザデータの保存", MB_YESNO);
 				if(id == IDYES){
 					//DialogBox(hInstance, MAKEINTRESOURCE(IDD_MYDIALOG),NULL, DlgProc);
-					if(user.empty())MessageBox(NULL, L"ユーザモデルは取れませんでした。", L"no human",0) ;
+					if(user.empty()){
+						MessageBox(NULL, L"ユーザモデルは取れませんでした。", L"no human",0) ;
+						continue;
+					}
 					else {
 						outdata=window.filesave();
 						outfs.open(outdata);
@@ -227,7 +230,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		}else if(key == 'o'){
 			indata=window.fileopen();
 			//std::wcout<<L"open:"<<indata<<std::endl;
-			
+			std::wcout<<L"m:"<<indata<<std::endl;
 			data.input(indata,model);
 		}
 		if(message)
