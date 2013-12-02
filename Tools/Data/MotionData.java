@@ -27,6 +27,7 @@ public class MotionData{
 	public static final int L_FOOT = 13;
 	public static final int R_FOOT = 14;
 
+    public static final int MOVING_AVERAGE = 0;
 	
 	private static final Point[] line = {
 		new Point(TORSO,NECK),
@@ -146,6 +147,31 @@ public class MotionData{
 		if(time < 0 || time >= data.size() || position < 0 || position >= JOINT_NUMBER) return null;
 		else return data.get(time)[position];
 	}
+
+    public void set(int time, Vec3D[] newVec){
+	if(time < 0 || time >= data.size()) return;
+	else data.set(time,newVec);
+    }
+
+    public void movingAverageFilter(){
+	for(int t = 1; t < size()-1; t++){
+	    Vec3D[] tmp = new Vec3D[JOINT_NUMBER];
+	    for(int pos = 0; pos < JOINT_NUMBER; pos++){
+		tmp[pos] = get(t-1,pos).add(get(t,pos).add(get(t+1,pos))).times(1/3.0);
+	    }
+	    set(t,tmp);
+	}
+    }
+
+    public void filter(int select){
+	switch(select){
+	case MOVING_AVERAGE:
+	    movingAverageFilter();
+	    break;
+	default:
+	    break;
+	}
+    }
 	
 	public Vec3D[] convert(MotionData model, int i){
 		if(empty() || model.empty()){ return null; }

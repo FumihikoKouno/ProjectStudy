@@ -50,6 +50,7 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 	public JRadioButton[][] colorButtons = new JRadioButton[3][COLOR_NUM];
 	
 	public JButton convertButton = new JButton("Convert");
+	    public JButton[] filterButton = new JButton[3];
 	
 	public Point3DPlayer pp;
 	
@@ -92,6 +93,8 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 			}else{
 				selectFileButton[i] = new JButton("Select File");
 			}
+			    filterButton[i] = new JButton("Filter");
+			    filterButton[i].addActionListener(this);
 			movableButtons[i] = new JRadioButton("Movable");
 			movableButtons[i].addActionListener(this);
 			selectFileButton[i].addActionListener(this);
@@ -123,7 +126,11 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 			}
 			tmpPanel.setBorder(new TitledBorder("Color"));
 			panels[i].add(tmpPanel,BorderLayout.CENTER);
-			panels[i].add(selectFileButton[i],BorderLayout.SOUTH);
+			    tmpPanel = new JPanel();
+			    tmpPanel.setLayout(new GridLayout(2,1));
+			    tmpPanel.add(filterButton[i]);
+			    tmpPanel.add(selectFileButton[i]);
+			panels[i].add(tmpPanel,BorderLayout.SOUTH);
 			panels[i].setBorder(new TitledBorder(strTmp[i]));
 		}
 
@@ -183,6 +190,10 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 		}
 		String[] strTmp = {"Model", "User", "Result"};
 		for(int i = 0; i < 3; i++){
+		    if(e.getSource() == filterButton[i]){
+			if(data[i].size() == 0) return;
+			else data[i].filter(0);
+		    }
 			if(e.getSource() == showButtons[i]){
 				if(data[i].size() == 0) return;
 				else{
