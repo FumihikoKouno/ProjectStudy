@@ -135,7 +135,7 @@ int _tmain(int argc, _TCHAR* argv[])
 						//std::cout<<model.size()<<std::endl;
 						if(model.size()>1){
 							id=MessageBox(NULL, L"二人目以降のモデルデータも保存しますか？", L"データの保存", MB_YESNO);
-							if(id= IDYES){
+							if(id == IDYES){
 								for(int i=1;i<model.size();i++){
 									outdata=window.filesave();
 									outfs.open(outdata);
@@ -187,7 +187,7 @@ int _tmain(int argc, _TCHAR* argv[])
 						std::wcout<<L"u:"<<outdata<<std::endl;
 						if(user.size()>1){
 							id=MessageBox(NULL, L"二人目以降のモデルデータも保存しますか？", L"データの保存", MB_YESNO);
-							if(id= IDYES){
+							if(id == IDYES){
 								for(int i=1;i<user.size();i++){
 									outdata=window.filesave();
 									outfs.open(outdata);
@@ -230,8 +230,10 @@ int _tmain(int argc, _TCHAR* argv[])
 		}else if(key == 'o'){
 			indata=window.fileopen();
 			//std::wcout<<L"open:"<<indata<<std::endl;
-			std::wcout<<L"m:"<<indata<<std::endl;
-			data.input(indata,model);
+			if(indata==L" "){
+				std::wcout<<L"m:"<<indata<<std::endl;
+				data.input(indata,model);
+			}
 		}
 		if(message)
 				cv::putText(colorMat, message_str, cvPoint(colorMat.cols*4/5,colorMat.rows/8), CV_FONT_HERSHEY_SIMPLEX, 1.0f, CV_RGB(0,255,0),2,CV_AA);
