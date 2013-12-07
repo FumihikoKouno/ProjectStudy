@@ -24,17 +24,19 @@ import java.awt.event.ActionEvent;
 
 import java.io.IOException;
 import java.io.BufferedInputStream;
+import java.io.File;
 
 import Data.MotionDataConverter;
 
-	public class Runner extends JPanel implements ActionListener, Runnable{
+public class Runner extends JPanel implements ActionListener, Runnable{
 	private int WIDTH, HEIGHT;
 
 	private MotionDataConverter mdc;
 
-	private JFileChooser fc = new JFileChooser();
+	public JFileChooser fc = new JFileChooser();
 
-	private JTextField path = new JTextField("./main.exe");
+	public String selectedDir;
+	public JTextField path = new JTextField("./main.exe");
 	private JButton runButton = new JButton("Run");
 	private JButton selectButton = new JButton("Select File");
 	private boolean end = true;
@@ -108,7 +110,9 @@ import Data.MotionDataConverter;
 		}
 		if(str.equals("Select File")){
 			if(fc.showOpenDialog(this)==JFileChooser.APPROVE_OPTION){
-				path.setText(fc.getSelectedFile().getAbsolutePath());
+				File tmp = fc.getSelectedFile();
+				selectedDir = tmp.getParent();
+				path.setText(tmp.getAbsolutePath());
 			}
 		}
 	}

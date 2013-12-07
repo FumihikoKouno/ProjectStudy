@@ -31,6 +31,9 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 	public int WIDTH,HEIGHT;
 	public JFileChooser fileChooser = new JFileChooser();
 
+	
+	public String selectedDir;
+	public File[] selectedFile = new File[3];
 	public MotionData[] data = new MotionData[3];
 	public JButton[] selectFileButton = new JButton[3];
 	public JLabel[] fileNameLabel = new JLabel[3];
@@ -156,6 +159,7 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 		for(int i = 0; i < idx.length; i++){
 			if(s.startsWith(idx[i])){
 				if(!data[i].readFile(f)) return;
+				selectedFile[i] = f;
 				fileNameLabel[i].setText("File Name : " + f.getName());
 				fileLengthLabel[i].setText("" + data[i].size()+ " frame");
 				break;
@@ -167,9 +171,10 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 		for(int i = 0; i < 2; i++){
 			if(e.getSource() == selectFileButton[i]){
 				if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION){
-					File tmp = fileChooser.getSelectedFile();
-					if(!data[i].readFile(tmp)) return;
-					fileNameLabel[i].setText("File Name : " + tmp.getName());
+					selectedFile[i] = fileChooser.getSelectedFile();
+					selectedDir = selectedFile[i].getParent();
+					if(!data[i].readFile(selectedFile[i])) return;
+					fileNameLabel[i].setText("File Name : " + selectedFile[i].getName());
 					fileLengthLabel[i].setText("" + data[i].size() + " frame");
 				}
 			}
@@ -177,10 +182,11 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 		if(e.getSource() == selectFileButton[2]){
 			try{
 				if(fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION){
-					File tmp = fileChooser.getSelectedFile();
-					BufferedWriter bw = new BufferedWriter(new FileWriter(tmp));
+					selectedFile[2] = fileChooser.getSelectedFile();
+					selectedDir = selectedFile[2].getParent();
+					BufferedWriter bw = new BufferedWriter(new FileWriter(selectedFile[2]));
 					bw.write(""+data[2]);
-					fileNameLabel[2].setText("File Name : " + tmp.getName());
+					fileNameLabel[2].setText("File Name : " + selectedFile[2].getName());
 					fileLengthLabel[2].setText("" + data[2].size() + " frame");
 					bw.close();
 				}

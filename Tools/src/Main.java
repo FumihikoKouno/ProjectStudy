@@ -1,5 +1,3 @@
-
-
 import java.awt.Container;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -18,20 +16,23 @@ import java.awt.event.ComponentListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import Point3D.*;
 import Data.*;
 import Runner.*;
 
 public class Main extends JFrame implements ComponentListener{
-	Point3DPlayer pp;
-	MotionDataConverter mdc;
-	Runner runner;
-	JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-	JSplitPane right = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+	public Point3DPlayer pp;
+	public MotionDataConverter mdc;
+	public Runner runner;
+	public Env env;
+	public JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+	public JSplitPane right = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
 	Container contentPane;
-	Point3D.Option playerOption;
+	public Point3D.Option playerOption;
 
 	public Main() {
 		setTitle("Main");
@@ -88,6 +89,10 @@ public class Main extends JFrame implements ComponentListener{
 	}
 
 	public void run(){
+		right.setDividerLocation(right.getMaximumDividerLocation());
+		splitPane.setDividerLocation(splitPane.getMinimumDividerLocation());
+		env = Env.getInstance(this);
+		env.readFile();
 		int mspf;
 		long time;
 		while(true){
@@ -135,9 +140,16 @@ public class Main extends JFrame implements ComponentListener{
 	}
 
 	public static void main(String[] args) {
-		Main frame = new Main();
+		final Main frame = new Main();
 		frame.load(args);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.addWindowListener(
+			new WindowAdapter(){
+				public void windowClosing(WindowEvent e){
+					frame.env.end();
+					System.exit(0);
+				}
+			}
+		);
 		frame.setVisible(true);
 		frame.run();
 	}
