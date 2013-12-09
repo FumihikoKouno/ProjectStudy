@@ -9,6 +9,7 @@
 #include "KinectIO.h"
 #include <string>
 
+#include <sstream>
 #include <fstream>
 
 //int main(int argc, char* argv[])//
@@ -24,6 +25,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	int key,id;
 	int message=1;
+	int countdown=0;
 	bool record_model = false;
 	bool record_user = false;
 	std::vector<MotionData> model, user, goal;
@@ -56,13 +58,16 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//std::cout<<"start"<<std::endl;
 	while(true){
-		if(record_model){
+		if(record_model&& !countdown){
 //			outfs<<std::endl;
 			// add data of this frame to model
 			kio.rec(model,colorMat,depthMat,true);
+			message_str = "REC";
+
 			
-		}else if(record_user){
+		}else if(record_user&& !countdown){
 			kio.rec(user,colorMat,depthMat,false);
+			message_str = "REC(U)";
 			// user data of this frame convert to goal from model[idx]
 			if(!user.empty()){
 				while(user.size()>goal.size())goal.push_back(MotionData());
@@ -89,6 +94,12 @@ int _tmain(int argc, _TCHAR* argv[])
 				}
 			}
 
+		}else if(countdown){
+				kio.setVideo(colorMat);
+				std::stringstream ss;
+				ss << 1+countdown/30;
+				message_str = ss.str();
+				countdown--;
 		}else{
 			kio.setVideo(colorMat);
 		}
@@ -110,6 +121,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			if(!record_model){
 				record_model = true;
 				message_str = "REC";
+				countdown=150;
 				MessageBox(NULL, L"モデルの録画を開始します。", L"start",0);
 				model.clear();
 				for(int i = 0; i < kio.getUserNumber(); i++){
@@ -160,6 +172,7 @@ int _tmain(int argc, _TCHAR* argv[])
 					continue;
 				}
 				record_user = true;
+				countdown=150;
 				message_str = "REC(U)";
 				MessageBox(NULL, L"ユーザの録画を開始します。", L"start",0);
 				user.clear();
