@@ -17,7 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 
-import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -118,7 +118,7 @@ public class Option extends JDialog{
 		//	twoPers = new JRadioButton("Two Point Perspective", perspective==TWO_POINT_PERSPCETIVE);
 		ButtonGroup pers = new ButtonGroup();
 		JPanel persPanel = new JPanel();
-		persPanel.setBorder(new EtchedBorder());
+		persPanel.setBorder(new TitledBorder("Perspective Method"));
 		persPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
 		pers.add(noPers);
@@ -127,7 +127,7 @@ public class Option extends JDialog{
 		persPanel.add(onePers);
 
 		JPanel viewPointPanel = new JPanel();
-		viewPointPanel.setBorder(new EtchedBorder());
+		viewPointPanel.setBorder(new TitledBorder("Show Point"));
 		viewPointPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		viewPointPanel.add(viewRot);
 		viewPointPanel.add(viewOne);
@@ -154,11 +154,11 @@ public class Option extends JDialog{
 		btns.add(ok);
 		btns.add(cancel);
 
-		JLabel rotOrigin = new JLabel("Rotate Origin : (");
+		JLabel rotOrigin = new JLabel("(");
 		JLabel rotEnd = new JLabel(")");
 
 		JPanel rotPanel = new JPanel();
-		rotPanel.setBorder(new EtchedBorder());
+		rotPanel.setBorder(new TitledBorder("Rotate Origin"));
 		rotPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		rotPanel.add(rotOrigin);
 		rotPanel.add(rotX);
@@ -166,11 +166,11 @@ public class Option extends JDialog{
 		rotPanel.add(rotZ);
 		rotPanel.add(rotEnd);
 
-		JLabel oneOrigin = new JLabel("One Vanishing Point : (");
+		JLabel oneOrigin = new JLabel("(");
 		JLabel oneEnd = new JLabel(")");
 
 		JPanel onePanel = new JPanel();
-		onePanel.setBorder(new EtchedBorder());
+		onePanel.setBorder(new TitledBorder("One Vanishing Point"));
 		onePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		onePanel.add(oneOrigin);
 		onePanel.add(oneX);
@@ -179,6 +179,7 @@ public class Option extends JDialog{
 		onePanel.add(oneEnd);
 
 		JPanel fpsPanel = new JPanel();
+		fpsPanel.setBorder(new TitledBorder("FPS"));
 		fpsPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		fpsPanel.add(new JLabel("fps:"));
 		fpsPanel.add(fpsText);

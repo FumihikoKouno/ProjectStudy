@@ -16,7 +16,20 @@ public class Vec3D{
 			set(0,0,0);
 		}
 	}
-
+	public Vec3D(String s){
+		try{
+			String[] list = s.split(" ");
+			double[] d = new double[3];
+			for(int i = 0; i < 3; i++){
+				d[i] = Double.parseDouble(list[i]);
+			}
+			set(d[0],d[1],d[2]);
+		}catch(NumberFormatException e){
+			set(0,0,0);
+		}catch(IndexOutOfBoundsException e){
+			set(0,0,0);
+		}
+	}
 	public Vec3D clone(){
 		return new Vec3D(this);
 	}
