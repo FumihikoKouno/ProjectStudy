@@ -43,6 +43,7 @@ std::wstring mywindow::filesave(void)
 }
 
 std::wstring mywindow::fileopen(void){
+	std::wstring name=L".mywindow.dat";
 	static OPENFILENAME     ofn;
     static TCHAR            szPath[ MAX_PATH ];
     static TCHAR            szFile[ MAX_PATH ];
@@ -62,7 +63,7 @@ std::wstring mywindow::fileopen(void){
         ofn.Flags               = OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
     }
     if ( GetOpenFileName(&ofn) ){
-
+				name=szFile;
     }
-	return szFile;
+	return name;
 }

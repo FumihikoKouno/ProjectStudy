@@ -28,7 +28,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	int countdown=0;
 	bool record_model = false;
 	bool record_user = false;
-	std::vector<MotionData> model, user, goal;
+	std::vector<MotionData> model, user, preuser, goal;
 	MotionData data;
 //	BodyDataNode user, goal;
 	//std::cout<<"start"<<std::endl;
@@ -58,14 +58,20 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//std::cout<<"start"<<std::endl;
 	while(true){
-		if(record_model&& !countdown){
-//			outfs<<std::endl;
-			// add data of this frame to model
-			kio.rec(model,colorMat,depthMat,true);
-			message_str = "REC";
-
+		if(record_model){
+			if(!countdown){
+				// add data of this frame to model
+				kio.rec(model,colorMat,depthMat,true);
+				message_str = "REC";
+			}else{		
+				kio.setVideo(colorMat);
+				std::stringstream ss;
+				ss << 1+countdown/30;
+				message_str = ss.str();
+				countdown--;
+			}
 			
-		}else if(record_user&& !countdown){
+		}else if(record_user&&!countdown){
 			kio.rec(user,colorMat,depthMat,false);
 			message_str = "REC(U)";
 			// user data of this frame convert to goal from model[idx]
@@ -94,12 +100,32 @@ int _tmain(int argc, _TCHAR* argv[])
 				}
 			}
 
-		}else if(countdown){
-				kio.setVideo(colorMat);
-				std::stringstream ss;
-				ss << 1+countdown/30;
-				message_str = ss.str();
-				countdown--;
+		}else if(record_user){
+			kio.rec(preuser,colorMat,depthMat,false);
+			std::stringstream ss;
+			ss << 1+countdown/30;
+			message_str = ss.str();
+			countdown--;		
+			// user data of this frame convert to goal from model[idx]
+			if(!preuser.empty()){
+				while(preuser.size()>goal.size()){
+					user.push_back(MotionData());
+					goal.push_back(MotionData());
+				}
+				BodyDataNode view_node;
+				for(unsigned int i = 0; i < preuser.size(); i++){
+					if(preuser[i].size()!=0){
+							preuser[i].preconvert(model[0],view_node);//model[0]の動きをまねるようにする
+							for( int position = 0; position < 15; position++ ){
+								cv::Point2f registPoint2;
+								kio.getUserTracker().convertJointCoordinatesToDepth( (float)view_node.joints[position].getX(), (float)view_node.joints[position].getY(), (float)view_node.joints[position].getZ(), &registPoint2.x, &registPoint2.y ); // Registration Joint Position to Depth
+								cv::circle( colorMat, registPoint2, 10, static_cast<cv::Scalar>( color[i] ), -1, CV_AA );
+							}
+
+					}
+				}
+			}
+
 		}else{
 			kio.setVideo(colorMat);
 		}
@@ -177,6 +203,7 @@ int _tmain(int argc, _TCHAR* argv[])
 				MessageBox(NULL, L"ユーザの録画を開始します。", L"start",0);
 				user.clear();
 				goal.clear();
+				preuser.clear();
 				for(int i = 0; i < kio.getUserNumber(); i++){
 					user.push_back(MotionData());
 				}
@@ -243,7 +270,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		}else if(key == 'o'){
 			indata=window.fileopen();
 			//std::wcout<<L"open:"<<indata<<std::endl;
-			if(indata==L" "){
+			if(indata!=L".mywindow.dat"){
 				std::wcout<<L"m:"<<indata<<std::endl;
 				data.input(indata,model);
 			}
