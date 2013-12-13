@@ -6,7 +6,8 @@ public:
 	mywindow(void);
 	~mywindow(void);
 	HINSTANCE hInst;
-	std::wstring filesave(void);
-	std::wstring fileopen(void);
+	std::string filesave(void);
+	std::string fileopen(void);
+	int getint(int countdown);
 };
 
