@@ -26,12 +26,17 @@ import Data.*;
 
 public class Option extends JDialog{
 	public static int perspective = 0;
+	public static int viewMethod = 0;
 	public static int fps = 30;
 	public static Vec3D rot = new Vec3D();
 	public static Vec3D onePP = new Vec3D(0,0,500);
 	public static boolean viewR = false;
 	public static boolean viewO = false;
 
+	public static final int LINE_AND_POINT = 0;
+	public static final int RECT_AND_POINT = 1;
+	public static final int Z_BUFFER = 2;
+	
 	public static final int NO_PERSPECTIVE = 0;
 	public static final int ONE_POINT_PERSPECTIVE = 1;
 	public static final int TWO_POINT_PERSPECTIVE = 2;
@@ -50,6 +55,10 @@ public class Option extends JDialog{
 	private JRadioButton onePers;
 	private JRadioButton twoPers;
 
+	private JRadioButton methodLine;
+	private JRadioButton methodRect;
+	private JRadioButton methodZ;
+	
 	private JRadioButton viewRot = new JRadioButton("View Rotate Origin Point", viewR);
 	private JRadioButton viewOne = new JRadioButton("View One Point Persective Point", viewO);
 
@@ -71,6 +80,10 @@ public class Option extends JDialog{
 		oneX.setText(Double.toString(onePP.getX()));
 		oneY.setText(Double.toString(onePP.getY()));
 		oneZ.setText(Double.toString(onePP.getZ()));
+		
+		methodLine.setSelected(viewMethod==LINE_AND_POINT);
+		methodRect.setSelected(viewMethod==RECT_AND_POINT);
+		methodZ.setSelected(viewMethod==Z_BUFFER);
 
 		fpsText.setText(Integer.toString(fps));
 	}
@@ -105,6 +118,10 @@ public class Option extends JDialog{
 			}catch(NumberFormatException ne){
 				setValues();
 			}
+			
+			if(methodLine.isSelected()) viewMethod = LINE_AND_POINT;
+			if(methodRect.isSelected()) viewMethod = RECT_AND_POINT;
+			if(methodZ.isSelected()) viewMethod = Z_BUFFER;
 		}else{
 			setValues();
 		}
@@ -184,10 +201,25 @@ public class Option extends JDialog{
 		fpsPanel.add(new JLabel("fps:"));
 		fpsPanel.add(fpsText);
 
-		container.setLayout(new GridLayout(6,1));
+		JPanel methodPanel = new JPanel();
+		methodPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		methodPanel.setBorder(new TitledBorder("View Method"));
+		methodLine = new JRadioButton("Line and Point", viewMethod==LINE_AND_POINT);
+		methodRect = new JRadioButton("Rect and Point", viewMethod==RECT_AND_POINT);
+		methodZ = new JRadioButton("Z Buffer", viewMethod==Z_BUFFER);
+		ButtonGroup methods = new ButtonGroup();
+		methods.add(methodLine);
+		methods.add(methodRect);
+		methods.add(methodZ);
+		methodPanel.add(methodLine);
+		methodPanel.add(methodRect);
+		methodPanel.add(methodZ);
+		
+		container.setLayout(new GridLayout(7,1));
 
 		container.add(fpsPanel);
 		container.add(persPanel);
+		container.add(methodPanel);
 		container.add(rotPanel);
 		container.add(onePanel);
 		container.add(viewPointPanel);

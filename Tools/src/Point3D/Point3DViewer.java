@@ -55,6 +55,8 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 	private JPopupMenu popupMenu;
 	private JPanel menuPanel;
 
+	private DrawnData drawnData;
+	
 	private int WIDTH;
 	private int HEIGHT;
 
@@ -184,6 +186,8 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		addMouseWheelListener(this);
+		
+		drawnData = new DrawnData(width,height);
 
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		sharedOrigin = new Vec3D(WIDTH/2,HEIGHT/2,0);
@@ -195,6 +199,7 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 		if(w<0||h<0)return;
 		WIDTH = w;
 		HEIGHT = h;
+		drawnData.resize(w,h);
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		revalidate();
 		repaint();
@@ -218,16 +223,26 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 		dbg.setColor(Color.BLACK);
 		dbg.fillRect(0,0,WIDTH,HEIGHT);
 
+		boolean z_buffer = false;
 		switch(Option.perspective){
 		case Option.ONE_POINT_PERSPECTIVE:
+			if(Option.viewMethod==Option.Z_BUFFER){
+				z_buffer = true;
+				drawnData.reset();
+				drawnData.setZoom(zoom);
+			}
 			setPointByOnePointPerspective();
 			break;
 		case Option.NO_PERSPECTIVE:
 			setPoint();
 			break;
 		}
-		drawPointAndLine();
-
+		if(z_buffer)
+			drawnData.draw(dbg,zoom);
+		else
+			drawPointAndLine();
+		if(Option.viewR) drawPoint(Option.rot,Color.RED);
+		if(Option.viewO) drawPoint(Option.onePP,Color.BLUE);
 		draw();
 	}
 
@@ -240,26 +255,52 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 	private void setPointByOnePointPerspective(){
 		drawnPoint.clear();
 		ids.clear();
-		for(int i = 0; i < rotatedPoint.size(); i++){
-			Vec3D[] rp = rotatedPoint.get(i);
-			for(int j = 0; j < rp.length; j++){
-				Vec3D tmp = rp[j].sub(Option.onePP);
-				tmp = tmp.times(1.0-(rp[j].getZ()/Option.onePP.getZ()));
-				tmp = tmp.add(Option.onePP);
-				boolean insert = false;
-				for(int k = 0; k < drawnPoint.size(); k++){
-					if(tmp.getZ() > drawnPoint.get(k).getZ()){
-						drawnPoint.add(k,tmp);
-						ids.add(k,new Point(i,j));
-						insert = true;
-						break;
+		try{
+			for(int i = 0; i < rotatedPoint.size(); i++){
+				Vec3D[] rp = rotatedPoint.get(i).clone();
+				if(Option.viewMethod == Option.Z_BUFFER){
+					drawnData.setOrigin(origin.get(i));
+					for(int j = 0; j < rp.length; j++){
+						Vec3D tmp = new Vec3D(rp[j].getX(),rp[j].getY(),0);
+						rp[j] = tmp.add(Option.onePP.sub(tmp).times(rp[j].getZ()/Option.onePP.getZ()));	
+						int size = (int)((SIZE_ORIGIN.getZ()-rp[j].getZ())/SIZE_UNIT_BY_PERSPECTIVE);
+						drawnData.setCircle(rp[j], size, color.get(i));
+					}
+		
+					for(int j = 0; j < rp.length; j++){
+						for(int k = 0; k < line.get(i).length; k++){
+							if(j==line.get(i)[k].x){
+								int size = (int)((SIZE_ORIGIN.getZ()-rp[j].getZ())/SIZE_UNIT_BY_PERSPECTIVE);
+								int size2 = (int)((SIZE_ORIGIN.getZ()-rp[line.get(i)[k].y].getZ())/SIZE_UNIT_BY_PERSPECTIVE);
+								drawnData.setLine(rp[j], size<<1, rp[line.get(i)[k].y], size2<<1, color.get(i));
+							}
+						}
+					}
+				}else{
+					for(int j = 0; j < rp.length; j++){
+						//Vec3D tmp = rp[j].sub(Option.onePP);
+						//tmp = tmp.times(1.0-(rp[j].getZ()/Option.onePP.getZ()));
+						//tmp = tmp.add(Option.onePP);	
+						Vec3D tmp = new Vec3D(rp[j].getX(),rp[j].getY(),0);
+						tmp = tmp.add(Option.onePP.sub(tmp).times(rp[j].getZ()/Option.onePP.getZ()));
+						boolean insert = false;
+						for(int k = 0; k < drawnPoint.size(); k++){
+							if(tmp.getZ() > drawnPoint.get(k).getZ()){
+								drawnPoint.add(k,tmp);
+								ids.add(k,new Point(i,j));
+								insert = true;
+								break;
+							}
+						}
+						if(!insert){
+							drawnPoint.add(tmp);
+							ids.add(new Point(i,j));
+						}
 					}
 				}
-				if(!insert){
-					drawnPoint.add(tmp);
-					ids.add(new Point(i,j));
-				}
 			}
+		}catch(IndexOutOfBoundsException e){
+			
 		}
 	}
 
@@ -310,7 +351,7 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 				y = (int)(origin.get(id.x).getY()-dp.getY()*zoom);
 				int size = (int)((SIZE_ORIGIN.getZ()-dp.getZ())/SIZE_UNIT_BY_PERSPECTIVE);
 				dbg.setColor(color.get(id.x));
-				dbg.fillOval(x-2,y-2,size,size);
+				dbg.fillOval(x-size,y-size,size<<1,size<<1);
 				for(int j = 0; j < line.get(id.x).length; j++){
 					Vec3D tmpV;
 					Point tmpL = line.get(id.x)[j];
@@ -320,13 +361,32 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 					x2 = (int)(origin.get(id.x).getX()+tmpV.getX()*zoom);
 					y2 = (int)(origin.get(id.x).getY()-tmpV.getY()*zoom);
 					int size2 = (int)((SIZE_ORIGIN.getZ()-tmpV.getZ())/SIZE_UNIT_BY_PERSPECTIVE);
-					dbg.drawLine(x+size/2,y+size/2,x2+size2/2,y2+size2/2);
+					if(Option.viewMethod==Option.LINE_AND_POINT)
+						dbg.drawLine(x,y,x2,y2);
+					else{
+						Vec3D verticle = new Vec3D(y-y2,x2-x,0);
+						verticle = verticle.unit();
+						verticle = verticle.times(size);
+						int[] xPoint = new int[4];
+						int[] yPoint = new int[4];
+						xPoint[0] = (int)(x+verticle.getX());
+						xPoint[1] = (int)(x-verticle.getX());
+						yPoint[0] = (int)(y+verticle.getY());
+						yPoint[1] = (int)(y-verticle.getY());
+						verticle = verticle.unit();
+						verticle = verticle.times(size2);
+						xPoint[2] = (int)(x2-verticle.getX());
+						xPoint[3] = (int)(x2+verticle.getX());
+						yPoint[2] = (int)(y2-verticle.getY());
+						yPoint[3] = (int)(y2+verticle.getY());
+						dbg.fillPolygon(xPoint,yPoint,4);
+					}
 				}
 			}
 		}catch(IndexOutOfBoundsException e){
-			System.out.println("IndexOut");
+			System.out.println("IndexOut in drawPointAndLine");
 		}catch(NullPointerException e){
-			System.out.println("NullPointer");
+			System.out.println("NullPointer in drawPointAndLine");
 		}
 	}
 
@@ -340,9 +400,6 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 	}
 
 	public void draw(){
-		drawPointAndLine();
-		if(Option.viewR) drawPoint(Option.rot,Color.RED);
-		if(Option.viewO) drawPoint(Option.onePP,Color.BLUE);
 		try{
 			Graphics g = getGraphics();
 			if((g != null) && (dbImage != null)){

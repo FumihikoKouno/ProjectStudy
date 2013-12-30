@@ -69,6 +69,7 @@ public class Env{
 			main.playerOption.onePP = new Vec3D(map.get("OneVanishmentPoint"));
 			main.playerOption.viewR = map.get("ShowRotateOrigin").equals("true");
 			main.playerOption.viewO = map.get("ShowOneVanishmentPoint").equals("true");
+			main.playerOption.viewMethod = Integer.parseInt(map.get("ViewMethod"));
 			main.playerOption.setValues();
 			
 		}catch(NullPointerException e){
@@ -118,6 +119,7 @@ public class Env{
 		map.put("OneVanishmentPoint",""+main.playerOption.onePP);
 		map.put("ShowRotateOrigin",""+main.playerOption.viewR);
 		map.put("ShowOneVanishmentPoint",""+main.playerOption.viewO);
+		map.put("ViewMethod",""+main.playerOption.viewMethod);
 	}
 	
 	private void write(){
