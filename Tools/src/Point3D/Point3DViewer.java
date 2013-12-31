@@ -52,6 +52,8 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 	public ArrayList<String> names = new ArrayList<String>();
 	public ArrayList<Boolean> selected = new ArrayList<Boolean>();
 
+	public Quaternion testQu = new Quaternion(1,0,0,0);
+	
 	private JPopupMenu popupMenu;
 	private JPanel menuPanel;
 
@@ -230,6 +232,38 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 				z_buffer = true;
 				drawnData.reset();
 				drawnData.setZoom(zoom);
+				/*
+				 * test
+				Vec3D[] a = new Vec3D[8];
+				drawnData.setOrigin(new Vec3D(WIDTH/2,HEIGHT/2,0));
+				drawnData.setZoom(zoom);
+				a[0] = new Vec3D(0,50,-50);
+				a[1] = new Vec3D(0,-50,-50);
+				a[2] = new Vec3D(50,-50,0);
+				a[3] = new Vec3D(50,50,0);
+				a[4] = new Vec3D(0,50,50);
+				a[5] = new Vec3D(0,-50,50);
+				a[6] = new Vec3D(-50,-50,0);
+				a[7] = new Vec3D(-50,50,0);
+				for(int i = 0; i < a.length; i++){
+					a[i] = testQu.rotate(a[i].sub(Option.rot));
+					a[i] = a[i].add(Option.rot);
+				}
+				drawnData.setCircle(a[0], 10, Color.RED);
+				drawnData.setCircle(a[1], 10, Color.RED);
+				drawnData.setCircle(a[2], 10, Color.BLUE);
+				drawnData.setCircle(a[3], 10, Color.BLUE);
+				drawnData.setCircle(a[4], 10, Color.YELLOW);
+				drawnData.setCircle(a[5], 10, Color.YELLOW);
+				drawnData.setCircle(a[6], 10, Color.GREEN);
+				drawnData.setCircle(a[7], 10, Color.GREEN);
+				drawnData.setRect(a[0],a[1],a[2],a[3],Color.RED);
+				drawnData.setRect(a[2],a[3],a[4],a[5],Color.BLUE);
+				drawnData.setRect(a[4],a[5],a[6],a[7],Color.YELLOW);
+				drawnData.setRect(a[6],a[7],a[0],a[1],Color.GREEN);
+				drawnData.setRect(a[0],a[1],a[5],a[4],Color.WHITE);
+				drawnData.setRect(a[2],a[3],a[7],a[6],Color.LIGHT_GRAY);
+				*/
 			}
 			setPointByOnePointPerspective();
 			break;
@@ -263,14 +297,13 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 					for(int j = 0; j < rp.length; j++){
 						Vec3D tmp = new Vec3D(rp[j].getX(),rp[j].getY(),0);
 						rp[j] = tmp.add(Option.onePP.sub(tmp).times(rp[j].getZ()/Option.onePP.getZ()));	
-						int size = (int)((SIZE_ORIGIN.getZ()-rp[j].getZ())/SIZE_UNIT_BY_PERSPECTIVE);
-						drawnData.setCircle(rp[j], size, color.get(i));
 					}
 		
 					for(int j = 0; j < rp.length; j++){
+						int size = (int)((SIZE_ORIGIN.getZ()-rp[j].getZ())/SIZE_UNIT_BY_PERSPECTIVE);
+						drawnData.setCircle(rp[j], size, Color.BLUE);//color.get(i));
 						for(int k = 0; k < line.get(i).length; k++){
 							if(j==line.get(i)[k].x){
-								int size = (int)((SIZE_ORIGIN.getZ()-rp[j].getZ())/SIZE_UNIT_BY_PERSPECTIVE);
 								int size2 = (int)((SIZE_ORIGIN.getZ()-rp[line.get(i)[k].y].getZ())/SIZE_UNIT_BY_PERSPECTIVE);
 								drawnData.setLine(rp[j], size<<1, rp[line.get(i)[k].y], size2<<1, color.get(i));
 							}
@@ -430,6 +463,7 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 			Vec3D from = new Vec3D(0,0,-1);
 			Vec3D to = new Vec3D(xDiff,-yDiff,-Math.sqrt(abs*abs-(xDiff*xDiff+yDiff*yDiff)));
 			Quaternion rot = new Quaternion(from,to);
+			testQu = testQu.mul(rot);
 			for(int i = 0; i < selected.size(); i++){
 				if(selected.get(i)){
 					qu.set(i,qu.get(i).mul(rot));

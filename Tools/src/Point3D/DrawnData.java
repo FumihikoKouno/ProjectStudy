@@ -92,6 +92,14 @@ public class DrawnData {
  		Vec3D xAxis = line[0].times(xk[0]).add(line[1].times(xk[1]));
 		Vec3D yAxis = line[0].times(yk[0]).add(line[1].times(yk[1]));
 
+		Vec3D tmpP0 = xAxis.times(p[0].getX());
+		tmpP0 = tmpP0.add(yAxis.times(p[0].getY()));
+		tmpP0 = p[0].sub(tmpP0);
+
+		Vec3D[] rectangle = new Vec3D[4];
+		for(int i = 0; i < p.length; i++)
+			rectangle[i] = p[i].times(zoom);
+		
 		for(int y = minY; y <= maxY; y++){
 			int absY = (int)(origin.getY()-y);
 			if(absY < 0 || absY >= height) continue;
@@ -99,9 +107,6 @@ public class DrawnData {
 				int absX = (int)(origin.getX()+x);
 				if(absX < 0 || absX >= width) continue;
 
-				Vec3D[] rectangle = new Vec3D[4];
-				for(int i = 0; i < p.length; i++)
-					rectangle[i] = p[i].times(zoom);
 				if(!inRect(x,y,rectangle)){
 					continue;
 				}
@@ -109,11 +114,9 @@ public class DrawnData {
 				 *  二つのベクトルの一時結合でその点が表せれば
 				 *  その二つのベクトルがなす平面上に点が存在することになる
 				 */
-				Vec3D tmpPoint = new Vec3D(x,y,0);
-				tmpPoint = tmpPoint.sub(p[0]);
-				int z = (int)(tmpPoint.getX()*xAxis.getZ()
-						    + tmpPoint.getY()*yAxis.getZ()
-						    + p[0].getZ());
+				double z = (x*xAxis.getZ()
+						  + y*yAxis.getZ()
+						  + tmpP0.getZ());
 
 				if(data[absY][absX] == null) data[absY][absX] = new DrawnPointData(z,c);
 				else data[absY][absX].set(z,c);
