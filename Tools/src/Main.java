@@ -22,12 +22,14 @@ import java.awt.event.WindowEvent;
 import Point3D.*;
 import Data.*;
 import Runner.*;
+import Score.*;
 
 public class Main extends JFrame implements ComponentListener{
 	public Point3DPlayer pp;
 	public MotionDataConverter mdc;
 	public Runner runner;
 	public Env env;
+	public ScoreViewer sv;
 	public JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 	public JSplitPane right = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
@@ -43,9 +45,12 @@ public class Main extends JFrame implements ComponentListener{
 		mdc.addComponentListener(this);
 		runner = new Runner(mdc);
 		runner.addComponentListener(this);
+		sv = new ScoreViewer(mdc,480,480);
+		sv.addComponentListener(this);
 		JPanel left = new JPanel();
 		left.add(mdc);
-		right.setLeftComponent(pp);
+//		right.setLeftComponent(pp);
+		right.setLeftComponent(sv);
 		right.setRightComponent(runner);
 		splitPane.setLeftComponent(left);
 		splitPane.setRightComponent(right);
@@ -119,7 +124,8 @@ public class Main extends JFrame implements ComponentListener{
 	}
 
 	public void update(){
-		pp.update();
+		//pp.update();
+		sv.update();
 	}
 
 	public void componentResized(ComponentEvent e){
@@ -128,7 +134,8 @@ public class Main extends JFrame implements ComponentListener{
 		Dimension runnerD = runner.getSize();
 		int newW = frameD.width-mdcD.width;
 		int newH = frameD.height-runnerD.height;
-		pp.reSize(newW,newH);
+		//pp.reSize(newW,newH);
+		sv.reSize(newW,newH);
 		contentPane.validate();
 		contentPane.repaint();
 	}

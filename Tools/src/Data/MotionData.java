@@ -172,6 +172,45 @@ public class MotionData{
 	    break;
 	}
     }
+    
+    public double getAngleDiff(MotionData model, int t, int from, int mid, int to){
+    	Vec3D myFrom = get(t,from);
+    	Vec3D myMid = get(t,mid);
+    	Vec3D myTo = get(t,to);
+    	Vec3D modelFrom = model.get(t,from);
+    	Vec3D modelMid = model.get(t,mid);
+    	Vec3D modelTo = model.get(t,to);
+    	double mytheta = (myMid.sub(myFrom)).getAngle(myTo.sub(myMid));
+    	double modeltheta = (modelMid.sub(modelFrom)).getAngle(modelTo.sub(modelMid));
+    	return Math.abs(mytheta-modeltheta);
+    }
+    
+    public double getFrameScore(MotionData model, int t){
+    	double maxDiff = Math.PI*JOINT_NUMBER;
+    	double sumDiff = 0;
+    	sumDiff += getAngleDiff(model,t,HEAD,NECK,TORSO);
+    	sumDiff += getAngleDiff(model,t,NECK,TORSO,L_SHOULDER);
+    	sumDiff += getAngleDiff(model,t,TORSO,L_SHOULDER,L_ELBOW);
+    	sumDiff += getAngleDiff(model,t,L_SHOULDER,L_ELBOW,L_HAND);
+    	sumDiff += getAngleDiff(model,t,NECK,TORSO,R_SHOULDER);
+    	sumDiff += getAngleDiff(model,t,TORSO,R_SHOULDER,R_ELBOW);
+    	sumDiff += getAngleDiff(model,t,R_SHOULDER,R_ELBOW,R_HAND);
+    	sumDiff += getAngleDiff(model,t,NECK,TORSO,L_HIP);
+    	sumDiff += getAngleDiff(model,t,TORSO,L_HIP,L_KNEE);
+    	sumDiff += getAngleDiff(model,t,L_HIP,L_KNEE,L_FOOT);
+    	sumDiff += getAngleDiff(model,t,NECK,TORSO,R_HIP);
+    	sumDiff += getAngleDiff(model,t,TORSO,R_HIP,R_KNEE);
+    	sumDiff += getAngleDiff(model,t,R_HIP,R_KNEE,R_FOOT);
+    	return 1.0-sumDiff/maxDiff;
+    }
+    public double getScore(MotionData model){
+    	int maxFrame = (size() < model.size() ? size() : model.size());
+    	double sum = 0;
+    	for(int i = 0; i < maxFrame; i++){
+    		sum += getFrameScore(model,i);
+    	}
+    	return sum/maxFrame;
+    }
 
 	public Vec3D[] convert(MotionData model, int i){
 		if(empty() || model.empty()){ return null; }

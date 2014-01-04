@@ -49,6 +49,9 @@ public class Vec3D{
 	public Vec3D cross(Vec3D v){
 		return new Vec3D(y*v.z-z*v.y, z*v.x-x*v.z, x*v.y-y*v.x);
 	}
+	public double getAngle(Vec3D v){
+		return Math.acos(unit().dot(v.unit()));
+	}
 	public Vec3D add(Vec3D v){
 		return new Vec3D(x+v.x,y+v.y,z+v.z);
 	}
