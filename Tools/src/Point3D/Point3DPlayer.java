@@ -36,7 +36,7 @@ public class Point3DPlayer extends JPanel implements ActionListener, AdjustmentL
 	public int WIDTH;
 	public int HEIGHT;
 
-	public static final int BUTTON_HEIGHT = 52;
+	public static final int BUTTON_HEIGHT = 50;
 
 	public Point3DViewer pv;
 
@@ -146,7 +146,7 @@ public class Point3DPlayer extends JPanel implements ActionListener, AdjustmentL
 		WIDTH = w;
 		HEIGHT = h;
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
-		pv.reSize(WIDTH,HEIGHT-BUTTON_HEIGHT-sb.size()*20-70);
+		pv.reSize(WIDTH,HEIGHT-BUTTON_HEIGHT-sb.size()*20);
 
 		scrollPanel.setLayout(new GridLayout(sb.size(),1));
 		scrollPanel.revalidate();

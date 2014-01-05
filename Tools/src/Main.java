@@ -32,7 +32,8 @@ public class Main extends JFrame implements ComponentListener{
 	public ScoreViewer sv;
 	public JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 	public JSplitPane right = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-
+	public JTabbedPane tab = new JTabbedPane();
+	
 	Container contentPane;
 	public Point3D.Option playerOption;
 
@@ -47,10 +48,11 @@ public class Main extends JFrame implements ComponentListener{
 		runner.addComponentListener(this);
 		sv = new ScoreViewer(mdc,480,480);
 		sv.addComponentListener(this);
+		tab.add("Player",pp);
+		tab.add("Score",sv);
 		JPanel left = new JPanel();
 		left.add(mdc);
-//		right.setLeftComponent(pp);
-		right.setLeftComponent(sv);
+		right.setLeftComponent(tab);
 		right.setRightComponent(runner);
 		splitPane.setLeftComponent(left);
 		splitPane.setRightComponent(right);
@@ -124,17 +126,17 @@ public class Main extends JFrame implements ComponentListener{
 	}
 
 	public void update(){
-		//pp.update();
-		sv.update();
+		if(tab.getSelectedComponent() == pp) pp.update();
+		if(tab.getSelectedComponent() == sv) sv.update();
 	}
 
 	public void componentResized(ComponentEvent e){
 		Dimension frameD = getSize();
 		Dimension mdcD = mdc.getSize();
 		Dimension runnerD = runner.getSize();
-		int newW = frameD.width-mdcD.width;
-		int newH = frameD.height-runnerD.height;
-		//pp.reSize(newW,newH);
+		int newW = frameD.width-mdcD.width-38;
+		int newH = frameD.height-runnerD.height-102;
+		pp.reSize(newW,newH);
 		sv.reSize(newW,newH);
 		contentPane.validate();
 		contentPane.repaint();

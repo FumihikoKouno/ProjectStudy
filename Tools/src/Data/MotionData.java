@@ -186,7 +186,7 @@ public class MotionData{
     }
     
     public double getFrameScore(MotionData model, int t){
-    	double maxDiff = Math.PI*JOINT_NUMBER;
+    	double maxDiff = (Math.PI/2)*JOINT_NUMBER;
     	double sumDiff = 0;
     	sumDiff += getAngleDiff(model,t,HEAD,NECK,TORSO);
     	sumDiff += getAngleDiff(model,t,NECK,TORSO,L_SHOULDER);
