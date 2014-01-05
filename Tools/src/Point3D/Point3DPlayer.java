@@ -303,8 +303,9 @@ public class Point3DPlayer extends JPanel implements ActionListener, AdjustmentL
 	public void update(){
 		if(playing){
 			next();
+			pv.update();
 		}
-		pv.update();
+//		pv.update();
 	}
 
 }

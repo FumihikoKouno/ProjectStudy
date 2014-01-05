@@ -201,7 +201,7 @@ public class MotionData{
     	sumDiff += getAngleDiff(model,t,NECK,TORSO,R_HIP);
     	sumDiff += getAngleDiff(model,t,TORSO,R_HIP,R_KNEE);
     	sumDiff += getAngleDiff(model,t,R_HIP,R_KNEE,R_FOOT);
-    	return 1.0-sumDiff/maxDiff;
+    	return (1.0-sumDiff/maxDiff)*100;
     }
     public double getScore(MotionData model){
     	int maxFrame = (size() < model.size() ? size() : model.size());

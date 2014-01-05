@@ -62,9 +62,6 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 	private int WIDTH;
 	private int HEIGHT;
 
-	private Image dbImage;
-	private Graphics dbg;
-
 	public void reset(){
 		point.clear();
 		rotatedPoint.clear();
@@ -74,6 +71,7 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 		names.clear();
 		selected.clear();
 		zoom = 1;
+		repaint();
 	}
 
 	public void setDefaultView(){
@@ -97,11 +95,13 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 			origin.set(i,new Vec3D(((-minX-maxX)*zoom+WIDTH)/2.0,((minY+maxY)*zoom+HEIGHT)/2.0,0));
 			qu.set(i,new Quaternion(1,0,0,0));
 		}
+		repaint();
 	}
 
 	public void updatePoints(int i, Vec3D[] v){
 		point.set(i,v);
 		autoRotate();
+		repaint();
 	}
 
 	public void updatePoints(String s, Vec3D[] v){
@@ -115,6 +115,7 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 		line.set(i,l);
 		color.set(i,c);
 		autoRotate();
+		repaint();
 	}
 
 	public int nameToIdx(String s){
@@ -133,6 +134,7 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 		line.set(idx,l);
 		color.set(idx,c);
 		autoRotate();
+		repaint();
 	}
 
 	public void addPoints(String s, Vec3D[] v, Point[] l, Color c, boolean b){
@@ -158,10 +160,12 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 		selected.add(b);
 		origin.add(new Vec3D(((-minX-maxX)*zoom+WIDTH)/2.0,((minY+maxY)*zoom+HEIGHT)/2.0-10,0));
 		qu.add(new Quaternion(1,0,0,0));
+		repaint();
 	}
 
 	public void setColor(int i, Color c){
 		color.set(i,c);
+		repaint();
 	}
 
 	public void rmPoints(String s){
@@ -175,6 +179,7 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 		selected.remove(i);
 		origin.remove(i);
 		qu.remove(i);
+		repaint();
 	}
 
 	public Point3DViewer(){
@@ -205,31 +210,15 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		revalidate();
 		repaint();
-		dbImage = createImage(WIDTH,HEIGHT);
-		dbg = dbImage.getGraphics();
 	}
 
 	public void setSizeOrigin(Vec3D v){ SIZE_ORIGIN = v; }
 	public void setSizeUnit(double d){ SIZE_UNIT_BY_PERSPECTIVE = d; }
 
-	public synchronized void update() {
-		if(dbImage == null){
-			dbImage = createImage(WIDTH,HEIGHT);
-			if(dbImage == null){
-				System.out.println("dbImage is null");
-				return;
-			}else{
-				dbg = dbImage.getGraphics();
-			}
-		}
-		dbg.setColor(Color.BLACK);
-		dbg.fillRect(0,0,WIDTH,HEIGHT);
-
-		boolean z_buffer = false;
+	public void paintComponent(Graphics g){
 		switch(Option.perspective){
 		case Option.ONE_POINT_PERSPECTIVE:
 			if(Option.viewMethod==Option.Z_BUFFER){
-				z_buffer = true;
 				drawnData.reset();
 				drawnData.setZoom(zoom);
 				/*
@@ -271,13 +260,18 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 			setPoint();
 			break;
 		}
-		if(z_buffer)
-			drawnData.draw(dbg,zoom);
+		g.setColor(Color.BLACK);
+		g.fillRect(0,0,WIDTH,HEIGHT);
+		if(Option.perspective == Option.ONE_POINT_PERSPECTIVE && Option.viewMethod==Option.Z_BUFFER)
+			drawnData.draw(g,zoom);
 		else
-			drawPointAndLine();
-		if(Option.viewR) drawPoint(Option.rot,Color.RED);
-		if(Option.viewO) drawPoint(Option.onePP,Color.BLUE);
-		draw();
+			drawPointAndLine(g);
+		if(Option.viewR) drawPoint(g,Option.rot,Color.RED);
+		if(Option.viewO) drawPoint(g,Option.onePP,Color.BLUE);
+	}
+	
+	public synchronized void update() {
+		repaint();
 	}
 
 	public void autoRotate(){
@@ -360,12 +354,12 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 		}
 	}
 
-	public void drawPoint(Vec3D p, Color c){
-		dbg.setColor(c);
+	public void drawPoint(Graphics g, Vec3D p, Color c){
+		g.setColor(c);
 		int x,y;
 		x = (int)(sharedOrigin.getX()+p.getX()*zoom);
 		y = (int)(sharedOrigin.getY()-p.getY()*zoom);
-		dbg.fillOval(x-2,y-2,8,8);
+		g.fillOval(x-2,y-2,8,8);
 	}
 
 	public void setMovable(String s, boolean b){
@@ -374,7 +368,7 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 		selected.set(i,b);
 	}
 
-	private void drawPointAndLine(){
+	private void drawPointAndLine(Graphics g){
 		try{
 			for(int i = 0; i < drawnPoint.size(); i++){
 				Point id = new Point(ids.get(i).x, ids.get(i).y);
@@ -383,8 +377,8 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 				x = (int)(origin.get(id.x).getX()+dp.getX()*zoom);
 				y = (int)(origin.get(id.x).getY()-dp.getY()*zoom);
 				int size = (int)((SIZE_ORIGIN.getZ()-dp.getZ())/SIZE_UNIT_BY_PERSPECTIVE);
-				dbg.setColor(color.get(id.x));
-				dbg.fillOval(x-size,y-size,size<<1,size<<1);
+				g.setColor(color.get(id.x));
+				g.fillOval(x-size,y-size,size<<1,size<<1);
 				for(int j = 0; j < line.get(id.x).length; j++){
 					Vec3D tmpV;
 					Point tmpL = line.get(id.x)[j];
@@ -395,7 +389,7 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 					y2 = (int)(origin.get(id.x).getY()-tmpV.getY()*zoom);
 					int size2 = (int)((SIZE_ORIGIN.getZ()-tmpV.getZ())/SIZE_UNIT_BY_PERSPECTIVE);
 					if(Option.viewMethod==Option.LINE_AND_POINT)
-						dbg.drawLine(x,y,x2,y2);
+						g.drawLine(x,y,x2,y2);
 					else{
 						Vec3D verticle = new Vec3D(y-y2,x2-x,0);
 						verticle = verticle.unit();
@@ -412,7 +406,7 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 						xPoint[3] = (int)(x2+verticle.getX());
 						yPoint[2] = (int)(y2-verticle.getY());
 						yPoint[3] = (int)(y2+verticle.getY());
-						dbg.fillPolygon(xPoint,yPoint,4);
+						g.fillPolygon(xPoint,yPoint,4);
 					}
 				}
 			}
@@ -432,20 +426,6 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 		}
 	}
 
-	public void draw(){
-		try{
-			Graphics g = getGraphics();
-			if((g != null) && (dbImage != null)){
-				g.drawImage(dbImage,0,0,null);
-			}
-			Toolkit.getDefaultToolkit().sync();
-			if(g != null){
-				g.dispose();
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-	}
 	/**
 	 * mouse methods
 	 */
@@ -480,11 +460,13 @@ public class Point3DViewer extends JPanel implements MouseListener, MouseMotionL
 		}
 		mouseX = mx;
 		mouseY = my;
+		repaint();
 	}
 
 	public void mouseWheelMoved(MouseWheelEvent e){
 		zoom -= e.getWheelRotation()/10.0;
 		if(zoom < MIN_ZOOM) zoom = MIN_ZOOM;
+		repaint();
 	}
 	public void mouseEntered(MouseEvent e){
 	}

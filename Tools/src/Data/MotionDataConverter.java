@@ -25,12 +25,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 
+import java.util.ArrayList;
 import Point3D.Point3DPlayer;
+import Util.DataChangeListener;
+import Util.DataChangeEvent;
 
 public class MotionDataConverter extends JPanel implements ActionListener{
 	public int WIDTH,HEIGHT;
 	public JFileChooser fileChooser = new JFileChooser();
 
+	public ArrayList<DataChangeListener> motionDataChangeListeners = new ArrayList<>();
 	
 	public String selectedDir;
 	public File[] selectedFile = new File[3];
@@ -69,10 +73,13 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 		setPreferredSize(new Dimension(WIDTH,HEIGHT));
 	}
 
-	public void resize(){
-		int ppX,ppY;
-		int mdcX,mdcY;
-		int runnerX,runnerY;
+	public void notifyMotionDataChangeListener(){
+		for(int i = 0 ; i < motionDataChangeListeners.size(); i++)
+			motionDataChangeListeners.get(i).dataChanged(new DataChangeEvent(this));
+	}
+	
+	public void addMotionDataChangeListener(DataChangeListener listener){
+		motionDataChangeListeners.add(listener);
 	}
 
 	public void init(){
@@ -162,6 +169,7 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 				selectedFile[i] = f;
 				fileNameLabel[i].setText("File Name : " + f.getName());
 				fileLengthLabel[i].setText("" + data[i].size()+ " frame");
+				notifyMotionDataChangeListener();
 				break;
 			}
 		}
@@ -176,6 +184,8 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 					if(!data[i].readFile(selectedFile[i])) return;
 					fileNameLabel[i].setText("File Name : " + selectedFile[i].getName());
 					fileLengthLabel[i].setText("" + data[i].size() + " frame");
+					pp.updatePoints();
+					notifyMotionDataChangeListener();
 				}
 			}
 		}
@@ -189,6 +199,7 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 					fileNameLabel[2].setText("File Name : " + selectedFile[2].getName());
 					fileLengthLabel[2].setText("" + data[2].size() + " frame");
 					bw.close();
+					notifyMotionDataChangeListener();
 				}
 			}catch(NullPointerException npe){
 			}catch(IOException ie){
@@ -243,6 +254,7 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 				data[2] = data[1].convertAll(data[0]);
 				fileNameLabel[2].setText("File Name : New File");
 				fileLengthLabel[2].setText("" + data[2].size() + " frame");
+				pp.updatePoints();
 			}catch(NullPointerException npe){
 			}
 		}

@@ -127,7 +127,6 @@ public class Main extends JFrame implements ComponentListener{
 
 	public void update(){
 		if(tab.getSelectedComponent() == pp) pp.update();
-		if(tab.getSelectedComponent() == sv) sv.update();
 	}
 
 	public void componentResized(ComponentEvent e){
