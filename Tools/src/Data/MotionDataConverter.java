@@ -34,7 +34,7 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 	public int WIDTH,HEIGHT;
 	public JFileChooser fileChooser = new JFileChooser();
 
-	public ArrayList<DataChangeListener> motionDataChangeListeners = new ArrayList<>();
+	public ArrayList<DataChangeListener> motionDataChangeListeners = new ArrayList<DataChangeListener>();
 	
 	public String selectedDir;
 	public File[] selectedFile = new File[3];
