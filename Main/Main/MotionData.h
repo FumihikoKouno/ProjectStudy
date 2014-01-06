@@ -13,7 +13,7 @@ public:
 	
 	std::ostream& dump(std::ostream& os) const;
 	void output(std::string s);
-	void input(std::wstring s,std::vector<MotionData>& data);
+	void input(std::string s,std::vector<MotionData>& data);
 	void reset();
 	void add(BodyDataNode& bd);
 	int size();
@@ -21,6 +21,7 @@ public:
 	BodyDataNode& operator[](int i);
 	BodyDataNode& back();
 	void convert(MotionData& model, BodyDataNode& ret);
+	void preconvert(MotionData& model, BodyDataNode& ret);
 	void convert_all(MotionData& model, MotionData& ret);
 	
 private:

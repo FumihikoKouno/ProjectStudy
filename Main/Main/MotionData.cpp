@@ -27,7 +27,7 @@ int MotionData::capacity(){
 	return data.capacity();
 }
 
-void MotionData::input(std::wstring s,std::vector<MotionData>& data1){
+void MotionData::input(std::string s,std::vector<MotionData>& data1){
 	reset();
 	std::ifstream in;
 	in.open(s);
@@ -62,8 +62,13 @@ void MotionData::convert(MotionData& model, BodyDataNode& ret){
 	int size = data.size();
 	ThreeDVector diff = data[0].joints[JOINT_TORSO]-model[0].joints[JOINT_TORSO];
 	data.back().convert(model[size-1],diff,ret);
-}
 
+}
+void MotionData::preconvert(MotionData& model, BodyDataNode& ret){
+
+	ThreeDVector diff = data.back().joints[JOINT_TORSO]-model[0].joints[JOINT_TORSO];
+	data.back().convert(model[0],diff,ret);
+}
 void MotionData::convert_all(MotionData& model, MotionData& ret){
 	ret.reset();
 	BodyDataNode tmp;

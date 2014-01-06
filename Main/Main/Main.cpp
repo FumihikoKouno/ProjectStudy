@@ -9,6 +9,7 @@
 #include "KinectIO.h"
 #include <string>
 
+#include <sstream>
 #include <fstream>
 
 //int main(int argc, char* argv[])//
@@ -17,16 +18,17 @@ int _tmain(int argc, _TCHAR* argv[])
 	cv::setUseOptimized( true );
 	//
 	//add
-	std::wstring indata,outdata;
+	std::string indata,outdata;
 	std::string message_str="STOP";
 	std::ofstream outfs;
 	
 
 	int key,id;
 	int message=1;
+	int countdown=0,countfirst=150;
 	bool record_model = false;
 	bool record_user = false;
-	std::vector<MotionData> model, user, goal;
+	std::vector<MotionData> model, user, preuser, goal;
 	MotionData data;
 //	BodyDataNode user, goal;
 	//std::cout<<"start"<<std::endl;
@@ -57,12 +59,21 @@ int _tmain(int argc, _TCHAR* argv[])
 	//std::cout<<"start"<<std::endl;
 	while(true){
 		if(record_model){
-//			outfs<<std::endl;
-			// add data of this frame to model
-			kio.rec(model,colorMat,depthMat,true);
+			if(!countdown){
+				// add data of this frame to model
+				kio.rec(model,colorMat,depthMat,true);
+				message_str = "REC";
+			}else{		
+				kio.setVideo(colorMat);
+				std::stringstream ss;
+				ss << 1+countdown/30;
+				message_str = ss.str();
+				countdown--;
+			}
 			
-		}else if(record_user){
+		}else if(record_user&&!countdown){
 			kio.rec(user,colorMat,depthMat,false);
+			message_str = "REC(U)";
 			// user data of this frame convert to goal from model[idx]
 			if(!user.empty()){
 				while(user.size()>goal.size())goal.push_back(MotionData());
@@ -89,6 +100,32 @@ int _tmain(int argc, _TCHAR* argv[])
 				}
 			}
 
+		}else if(record_user){
+			kio.rec(preuser,colorMat,depthMat,false);
+			std::stringstream ss;
+			ss << 1+countdown/30;
+			message_str = ss.str();
+			countdown--;		
+			// user data of this frame convert to goal from model[idx]
+			if(!preuser.empty()){
+				while(preuser.size()>goal.size()){
+					user.push_back(MotionData());
+					goal.push_back(MotionData());
+				}
+				BodyDataNode view_node;
+				for(unsigned int i = 0; i < preuser.size(); i++){
+					if(preuser[i].size()!=0){
+							preuser[i].preconvert(model[0],view_node);//model[0]の動きをまねるようにする
+							for( int position = 0; position < 15; position++ ){
+								cv::Point2f registPoint2;
+								kio.getUserTracker().convertJointCoordinatesToDepth( (float)view_node.joints[position].getX(), (float)view_node.joints[position].getY(), (float)view_node.joints[position].getZ(), &registPoint2.x, &registPoint2.y ); // Registration Joint Position to Depth
+								cv::circle( colorMat, registPoint2, 10, static_cast<cv::Scalar>( color[i] ), -1, CV_AA );
+							}
+
+					}
+				}
+			}
+
 		}else{
 			kio.setVideo(colorMat);
 		}
@@ -104,37 +141,38 @@ int _tmain(int argc, _TCHAR* argv[])
 			break;
 		}else if( key == VK_SPACE){
 			if(record_user){
-				MessageBox(NULL, L"ユーザモード中のため、モデルデータの録画はできません。", L"error",0);
+				MessageBox(NULL, "ユーザモード中のため、モデルデータの録画はできません。", "error",0);
 				continue;
 			}
 			if(!record_model){
 				record_model = true;
 				message_str = "REC";
-				MessageBox(NULL, L"モデルの録画を開始します。", L"start",0);
+				countdown=countfirst;
+				MessageBox(NULL, "モデルの録画を開始します。", "start",0);
 				model.clear();
 				for(int i = 0; i < kio.getUserNumber(); i++){
 					model.push_back(MotionData());
 				}
-				//std::cout<<"record_model"<<std::endl;
+				//std::cout<<"record_mode"<<std::endl;
 			}else{
 				record_model = false;
 				message_str = "STOP";
 				//std::cout<<"record stop"<<std::endl;
-				id=MessageBox(NULL, L"保存しますか？", L"データの保存", MB_YESNO);
+				id=MessageBox(NULL, "保存しますか？", "データの保存", MB_YESNO);
 				if(id == IDYES){
 					//DialogBox(hInstance, MAKEINTRESOURCE(IDD_MYDIALOG),NULL, DlgProc);
-					if(model.empty())MessageBox(NULL, L"モデルは取れませんでした。", L"no human",0) ;
+					if(model.empty())MessageBox(NULL, "モデルは取れませんでした。", "no human",0) ;
 					else {
 						outdata=window.filesave();
 						outfs.open(outdata);
 						outfs<<model[0];
 						outfs.close();
-						std::wcout<<L"m:"<<outdata<<std::endl;
+						std::cout<<"m:"<<outdata<<std::endl;
 						//二人目以降のデータを出力させる。*_2.datみたいなファイルで出力させておく
-						//ToDo::出てきた人の人数を把握する関数、wstringの末尾に数字をくっつけられる関数の把握
+						//ToDo::出てきた人の人数を把握する関数、stringの末尾に数字をくっつけられる関数の把握
 						//std::cout<<model.size()<<std::endl;
 						if(model.size()>1){
-							id=MessageBox(NULL, L"二人目以降のモデルデータも保存しますか？", L"データの保存", MB_YESNO);
+							id=MessageBox(NULL, "二人目以降のモデルデータも保存しますか？", "データの保存", MB_YESNO);
 							if(id == IDYES){
 								for(int i=1;i<model.size();i++){
 									outdata=window.filesave();
@@ -149,21 +187,23 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 		}else if(key == VK_RETURN){
 			if(record_model){
-				MessageBox(NULL, L"モデルモード中のため、ユーザデータの録画はできません。", L"error",0);
+				MessageBox(NULL, "モデルモード中のため、ユーザデータの録画はできません。", "error",0);
 				continue;
 			}
 			if(!record_user){
 				if(model.empty()){
 					record_user = false;
 					message_str = "STOP";
-					MessageBox(NULL, L"モデルデータが入力されていません", L"model error",0);
+					MessageBox(NULL, "モデルデータが入力されていません", "model error",0);
 					continue;
 				}
 				record_user = true;
+				countdown=countfirst;
 				message_str = "REC(U)";
-				MessageBox(NULL, L"ユーザの録画を開始します。", L"start",0);
+				MessageBox(NULL, "ユーザの録画を開始します。", "start",0);
 				user.clear();
 				goal.clear();
+				preuser.clear();
 				for(int i = 0; i < kio.getUserNumber(); i++){
 					user.push_back(MotionData());
 				}
@@ -172,11 +212,11 @@ int _tmain(int argc, _TCHAR* argv[])
 				record_user = false;
 				message_str = "STOP";
 				//std::cout<<"myrec stop"<<std::endl;
-				id=MessageBox(NULL, L"今の動きを保存しますか？", L"ユーザデータの保存", MB_YESNO);
+				id=MessageBox(NULL, "今の動きを保存しますか？", "ユーザデータの保存", MB_YESNO);
 				if(id == IDYES){
 					//DialogBox(hInstance, MAKEINTRESOURCE(IDD_MYDIALOG),NULL, DlgProc);
 					if(user.empty()){
-						MessageBox(NULL, L"ユーザモデルは取れませんでした。", L"no human",0) ;
+						MessageBox(NULL, "ユーザモデルは取れませんでした。", "no human",0) ;
 						continue;
 					}
 					else {
@@ -184,9 +224,9 @@ int _tmain(int argc, _TCHAR* argv[])
 						outfs.open(outdata);
 						outfs<<user[0];
 						outfs.close();
-						std::wcout<<L"u:"<<outdata<<std::endl;
+						std::cout<<"u:"<<outdata<<std::endl;
 						if(user.size()>1){
-							id=MessageBox(NULL, L"二人目以降のモデルデータも保存しますか？", L"データの保存", MB_YESNO);
+							id=MessageBox(NULL, "二人目以降のモデルデータも保存しますか？", "データの保存", MB_YESNO);
 							if(id == IDYES){
 								for(int i=1;i<user.size();i++){
 									outdata=window.filesave();
@@ -198,18 +238,18 @@ int _tmain(int argc, _TCHAR* argv[])
 						}
 					}
 				}
-				id=MessageBox(NULL, L"あなたの体に合ったモデルデータの動きを保存しますか？", L"ユーザに合ったモデルデータの保存", MB_YESNO);
+				id=MessageBox(NULL, "あなたの体に合ったモデルデータの動きを保存しますか？", "ユーザに合ったモデルデータの保存", MB_YESNO);
 				if(id == IDYES){
 					//DialogBox(hInstance, MAKEINTRESOURCE(IDD_MYDIALOG),NULL, DlgProc);
-					if(user.empty())MessageBox(NULL, L"ユーザモデルは取れませんでした。", L"no human",0) ;
+					if(user.empty())MessageBox(NULL, "ユーザモデルは取れませんでした。", "no human",0) ;
 					else {
 						outdata=window.filesave();
 						outfs.open(outdata);
 						outfs<<goal[0];
 						outfs.close();
-						std::wcout<<L"c:"<<outdata<<std::endl;
+						std::cout<<"c:"<<outdata<<std::endl;
 						if(goal.size()>1){
-							id=MessageBox(NULL, L"二人目以降のモデルデータも保存しますか？", L"データの保存", MB_YESNO);
+							id=MessageBox(NULL, "二人目以降のモデルデータも保存しますか？", "データの保存", MB_YESNO);
 							if(id= IDYES){
 								for(int i=1;i<goal.size();i++){
 									outdata=window.filesave();
@@ -226,14 +266,16 @@ int _tmain(int argc, _TCHAR* argv[])
 			message=1-message;
 		}else if(key == 'h'){
 			
-			MessageBox(NULL, L"「o」でモデルデータのファイルを開く\n「space」でモデルデータの録画開始と終了\n「Enter」でユーザデータの録画開始と終了\n「shift+a」で右上の文字の消去、生成\n「Esc」でアプリケーション終了", L"ヘルプ", MB_OK);
+			MessageBox(NULL, "「o」でモデルデータのファイルを開く\n「space」でモデルデータの録画開始と終了\n「Enter」でユーザデータの録画開始と終了\n「shift+a」で右上の文字の消去、生成\n「Esc」でアプリケーション終了", "ヘルプ", MB_OK);
 		}else if(key == 'o'){
 			indata=window.fileopen();
-			//std::wcout<<L"open:"<<indata<<std::endl;
-			if(indata==L" "){
-				std::wcout<<L"m:"<<indata<<std::endl;
+			//std::cout<<"open:"<<indata<<std::endl;
+			if(indata!=".mywindow.dat"){
+				std::cout<<"m:"<<indata<<std::endl;
 				data.input(indata,model);
 			}
+		}else if(key == 'c'){
+			countfirst=window.getint(countfirst);
 		}
 		if(message)
 				cv::putText(colorMat, message_str, cvPoint(colorMat.cols*4/5,colorMat.rows/8), CV_FONT_HERSHEY_SIMPLEX, 1.0f, CV_RGB(0,255,0),2,CV_AA);
