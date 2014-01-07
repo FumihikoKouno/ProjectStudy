@@ -34,7 +34,7 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 	public int WIDTH,HEIGHT;
 	public JFileChooser fileChooser = new JFileChooser();
 
-	public ArrayList<DataChangeListener> motionDataChangeListeners = new ArrayList<DataChangeListener>();
+	public ArrayList<DataChangeListener> dataChangeListeners = new ArrayList<DataChangeListener>();
 	
 	public String selectedDir;
 	public File[] selectedFile = new File[3];
@@ -74,14 +74,35 @@ public class MotionDataConverter extends JPanel implements ActionListener{
 	}
 
 	public void notifyMotionDataChangeListener(){
-		for(int i = 0 ; i < motionDataChangeListeners.size(); i++)
-			motionDataChangeListeners.get(i).dataChanged(new DataChangeEvent(this));
+		for(int i = 0 ; i < dataChangeListeners.size(); i++)
+			dataChangeListeners.get(i).dataChanged(new DataChangeEvent(this));
 	}
 	
-	public void addMotionDataChangeListener(DataChangeListener listener){
-		motionDataChangeListeners.add(listener);
+	public void addDataChangeListener(DataChangeListener listener){
+		dataChangeListeners.add(listener);
 	}
 
+	public void setViewFrame(int f){
+		String[] strTmp = {"Model", "User", "Result"};
+		for(int i = 0; i < 2; i++){
+			if(data[i].size() == 0) return;
+			else{
+				int colorIdx = -1;
+				for(int j = 0; j < COLOR_NUM; j++){
+					if(colorButtons[i][j].isSelected()){
+						colorIdx = j;
+						break;
+					}
+				}
+				if(!showButtons[i].isSelected()){
+					showButtons[i].setSelected(true);
+					pp.addData(strTmp[i],data[i],colors[colorIdx],movableButtons[i].isSelected());
+				}
+			}
+		}
+		pp.setPlayPosition(f);
+	}
+	
 	public void init(){
 		setLayout(new BorderLayout());
 		JPanel parts = new JPanel();

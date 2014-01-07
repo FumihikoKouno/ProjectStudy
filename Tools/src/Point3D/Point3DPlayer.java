@@ -65,6 +65,18 @@ public class Point3DPlayer extends JPanel implements ActionListener, AdjustmentL
 		updatePoints();
 	}
 
+	public void setPlayPosition(int p){
+		pause();
+		for(int i = 0; i < playPosition.size(); i++){
+			playPosition.set(i,p);
+		}
+		pv.setDefaultView();
+		for(JScrollBar jsb : sb){
+			jsb.setValue(p);
+		}
+		updatePoints();
+	}
+	
 	public void setColor(String s, Color c){
 		try{
 			String searchStr = " " + s + ": ";

@@ -1,4 +1,5 @@
 import java.awt.Container;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Component;
@@ -23,8 +24,9 @@ import Point3D.*;
 import Data.*;
 import Runner.*;
 import Score.*;
+import Util.*;
 
-public class Main extends JFrame implements ComponentListener{
+public class Main extends JFrame implements ComponentListener, DataChangeListener{
 	public Point3DPlayer pp;
 	public MotionDataConverter mdc;
 	public Runner runner;
@@ -48,6 +50,7 @@ public class Main extends JFrame implements ComponentListener{
 		runner.addComponentListener(this);
 		sv = new ScoreViewer(mdc,480,480);
 		sv.addComponentListener(this);
+		sv.addDataChangeListener(this);
 		tab.add("Player",pp);
 		tab.add("Score",sv);
 		JPanel left = new JPanel();
@@ -127,8 +130,16 @@ public class Main extends JFrame implements ComponentListener{
 
 	public void update(){
 		if(tab.getSelectedComponent() == pp) pp.update();
+//		pp.update();
 	}
 
+	public void dataChanged(DataChangeEvent e){
+		Component comp = e.getComponent();
+		if(comp == sv){
+			tab.setSelectedComponent(pp);
+		}
+	}
+	
 	public void componentResized(ComponentEvent e){
 		Dimension frameD = getSize();
 		Dimension mdcD = mdc.getSize();

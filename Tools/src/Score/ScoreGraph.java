@@ -12,11 +12,12 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
-
 import Data.*;
+import Util.*;
 
 public class ScoreGraph extends JPanel implements MouseMotionListener, MouseListener, MouseWheelListener{
 	private MotionDataConverter mdc;
@@ -24,7 +25,11 @@ public class ScoreGraph extends JPanel implements MouseMotionListener, MouseList
 	private double sum;
 
 	private final int pointSize = 5;
+	
+	private ArrayList<DataChangeListener> dataChangeListeners = new ArrayList<DataChangeListener>();
 
+	private boolean click = false;
+	
 	private int cursorX = Integer.MIN_VALUE;
 	private int mouseX = Integer.MIN_VALUE;
 	private int mouseY = Integer.MIN_VALUE;
@@ -133,7 +138,18 @@ public class ScoreGraph extends JPanel implements MouseMotionListener, MouseList
 			g.drawLine(p1.x, p1.y, p2.x, p2.y);
 		}
 	}
+	public boolean getClickStatus(){ return click; }
+	public int getFrame(){ return cursorX; }
+	public double getScore(){ return score[cursorX]; } 
 	
+	public void addDataChangeListener(DataChangeListener l){
+		dataChangeListeners.add(l);
+	}
+	public void notifyDataChangeListeners(){
+		for(DataChangeListener i : dataChangeListeners){
+			i.dataChanged(new DataChangeEvent(this));
+		}
+	}
 	public void mousePressed(MouseEvent e){
 	}
 	public void mouseDragged(MouseEvent e){
@@ -160,8 +176,12 @@ public class ScoreGraph extends JPanel implements MouseMotionListener, MouseList
 				break;
 			}
 		}
+		notifyDataChangeListeners();
 		update();
 	}
 	public void mouseClicked(MouseEvent e){
+		click = true;
+		notifyDataChangeListeners();
+		click = false;
 	}
 }
