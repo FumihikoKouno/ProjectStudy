@@ -109,7 +109,7 @@ public class ScoreGraph extends JPanel implements MouseMotionListener, MouseList
 			g.fillRect((int)(p.x-(int)xUnit/2),0,(int)xUnit,HEIGHT);
 			g.fillRect(0,(int)(p.y-(int)yUnit/2),WIDTH,(int)(yUnit));
 			g.setColor(Color.BLACK);
-			g.drawString("("+cursorX+","+(score[cursorX])+")", mouseX, mouseY);
+			//			g.drawString("("+cursorX+","+(score[cursorX])+")", mouseX, mouseY);
 		}
 		
 		g.setColor(Color.BLACK);
@@ -125,7 +125,7 @@ public class ScoreGraph extends JPanel implements MouseMotionListener, MouseList
 		for(int i = 0; i < 10; i++){
 			double x = (dataSize/10.0)*i;
 			Point p = convertToDraw(x,0);
-			g.drawString(""+x, p.x, p.y+20);
+			//			g.drawString(""+x, p.x, p.y+20);
 			g.drawLine(p.x, p.y-5, p.x, p.y+5);
 		}
 		
